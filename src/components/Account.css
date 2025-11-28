@@ -1,0 +1,113 @@
+.account {
+    padding: 3rem 1.5rem;
+    background-color: var(--color-white);
+    text-align: center;
+}
+
+.account-message {
+    margin-bottom: 2.5rem;
+    color: var(--color-text-light);
+    line-height: 2;
+    max-width: 450px;
+    margin-left: auto;
+    margin-right: auto;
+    font-weight: 300;
+}
+
+.account-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 0.6rem;
+    margin-bottom: 2rem;
+}
+
+.account-tab {
+    padding: 0.7rem 1.4rem;
+    background: none;
+    border: 1.5px solid var(--color-border);
+    border-radius: 24px;
+    font-size: 0.88rem;
+    color: var(--color-text-light);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-weight: 300;
+}
+
+.account-tab:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.account-tab.active {
+    background-color: var(--color-accent);
+    color: var(--color-white);
+    border-color: var(--color-accent);
+}
+
+.account-info-card {
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 2.5rem;
+    background-color: var(--color-bg);
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.account-detail {
+    margin-bottom: 2rem;
+}
+
+.account-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.account-row:last-child {
+    border-bottom: none;
+}
+
+.account-label {
+    font-size: 0.88rem;
+    color: var(--color-text-light);
+    font-weight: 300;
+}
+
+.account-value {
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--color-text);
+    font-family: var(--font-serif);
+    letter-spacing: 0.02em;
+}
+
+.copy-account-btn {
+    width: 100%;
+    padding: 0.9rem;
+    background-color: var(--color-accent);
+    color: var(--color-white);
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-weight: 300;
+    letter-spacing: 0.05em;
+}
+
+.copy-account-btn:hover {
+    background-color: var(--color-accent-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(201, 169, 130, 0.3);
+}
+
+.account-note {
+    margin-top: 1.5rem;
+    font-size: 0.8rem;
+    color: var(--color-text-lighter);
+    font-weight: 300;
+}
+

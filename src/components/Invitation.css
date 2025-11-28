@@ -1,0 +1,112 @@
+.invitation {
+    padding: 3rem 1.5rem;
+    background-color: var(--color-white);
+    text-align: center;
+}
+
+.section-title {
+    font-family: var(--font-serif);
+    font-size: 1.3rem;
+    color: var(--color-accent);
+    margin-bottom: 2rem;
+    text-transform: lowercase;
+    letter-spacing: 0.15em;
+    font-weight: 400;
+}
+
+.invitation-text {
+    font-size: 0.95rem;
+    line-height: 2.2;
+    margin: 0 auto 2.5rem;
+    max-width: 400px;
+    color: var(--color-text-light);
+    font-weight: 300;
+}
+
+.divider {
+    width: 50px;
+    height: 1px;
+    background-color: var(--color-accent);
+    margin: 2.5rem auto;
+    opacity: 0.6;
+}
+
+.names-section {
+    margin-top: 2rem;
+}
+
+.names-row {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+}
+
+.person {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.person .role {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--color-text-lighter);
+    font-weight: 300;
+}
+
+.person .name {
+    font-family: var(--font-serif);
+    font-size: 1.4rem;
+    color: var(--color-text);
+    font-weight: 400;
+    letter-spacing: 0.05em;
+}
+
+.parents-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.parents-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    align-items: center;
+}
+
+.parent {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    align-items: center;
+}
+
+.parent-role {
+    font-size: 0.7rem;
+    color: var(--color-text-lighter);
+    font-weight: 300;
+    letter-spacing: 0.05em;
+}
+
+.parent-name {
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+    font-weight: 300;
+}
+
+.parents-connector {
+    font-size: 0.85rem;
+    color: var(--color-text-lighter);
+    margin: 0 0.5rem;
+    font-weight: 300;
+}

@@ -1,0 +1,72 @@
+.movie {
+    padding: 3rem 1.5rem;
+    background-color: var(--color-section-bg);
+    text-align: center;
+}
+
+.movie-container {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.movie-placeholder {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%;
+    background-color: var(--color-bg);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.movie-placeholder::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #f5f3f0 0%, #e8e5e1 100%);
+}
+
+.play-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    z-index: 10;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+}
+
+.play-button:hover {
+    transform: translate(-50%, -50%) scale(1.15);
+    filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.2));
+}
+
+.play-button svg circle {
+    transition: fill var(--transition-fast);
+}
+
+.play-button:hover svg circle {
+    fill: rgba(255, 255, 255, 1);
+}
+
+.movie-caption {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--color-text-lighter);
+    font-size: 0.85rem;
+    z-index: 10;
+    font-weight: 300;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+}
+

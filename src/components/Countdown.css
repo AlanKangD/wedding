@@ -1,0 +1,53 @@
+.countdown {
+    text-align: center;
+    padding: 0;
+    flex: 1;
+}
+
+.countdown-label {
+    font-size: 1.8rem;
+    font-weight: 500;
+    color: var(--color-accent);
+    margin-bottom: 0.8rem;
+    font-family: var(--font-serif);
+    letter-spacing: 0.05em;
+}
+
+.countdown-time {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 0.3rem;
+}
+
+.time-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    min-width: 2.5rem;
+}
+
+.time-value {
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--color-text);
+    font-family: var(--font-serif);
+    line-height: 1;
+}
+
+.time-label {
+    font-size: 0.65rem;
+    color: var(--color-text-lighter);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 300;
+}
+
+.time-separator {
+    font-size: 1.2rem;
+    color: var(--color-accent);
+    margin: 0 0.1rem 0.3rem;
+    font-weight: 300;
+}
+
