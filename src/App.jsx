@@ -4,7 +4,6 @@ import Invitation from './components/Invitation';
 import Location from './components/Location';
 import Movie from './components/Movie';
 import Account from './components/Account';
-import RSVP from './components/RSVP';
 import Message from './components/Message';
 
 function App() {
@@ -17,7 +16,6 @@ function App() {
         <Movie />
         <Location />
         <Account />
-        <RSVP />
         <Message />
       </main>
     </div>
