@@ -28,8 +28,18 @@
     height: 100%;
     object-fit: cover;
     display: block;
-    transition: transform var(--transition-normal);
+    transition: transform var(--transition-normal), opacity var(--transition-normal);
     cursor: pointer;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 .main-image:hover {
@@ -109,7 +119,10 @@
 .thumbnail.active {
     opacity: 1;
     border-color: var(--color-accent);
+    border-width: 3px;
     box-shadow: 0 2px 8px rgba(201, 169, 130, 0.3);
+    transform: scale(1.05);
+    z-index: 1;
 }
 
 .gallery-placeholder {
