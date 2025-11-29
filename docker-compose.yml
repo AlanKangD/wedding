@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  wedding:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wedding-app
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    volumes:
+      # 필요시 로그 볼륨 마운트
+      - ./logs:/var/log/nginx
+
