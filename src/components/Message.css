@@ -20,15 +20,8 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-.form-row {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1.2rem;
-    align-items: center;
-}
-
 .message-input {
-    flex: 1;
+    width: 100%;
     padding: 0.9rem 1rem;
     border: 1.5px solid var(--color-border);
     border-radius: 8px;
@@ -36,6 +29,7 @@
     font-family: var(--font-main);
     background-color: var(--color-bg);
     transition: all var(--transition-fast);
+    margin-bottom: 1.2rem;
 }
 
 .message-input:focus {
@@ -43,25 +37,6 @@
     border-color: var(--color-accent);
     box-shadow: 0 0 0 3px rgba(201, 169, 130, 0.1);
     background-color: var(--color-white);
-}
-
-.radio-group-inline {
-    display: flex;
-    gap: 0.8rem;
-}
-
-.radio-label-inline {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.85rem;
-    color: var(--color-text-light);
-    cursor: pointer;
-    font-weight: 300;
-}
-
-.radio-label-inline input[type="radio"] {
-    accent-color: var(--color-accent);
 }
 
 .message-textarea {
@@ -150,19 +125,7 @@
 .message-text {
     color: var(--color-text-light);
     line-height: 1.8;
-    margin-bottom: 0.8rem;
     font-weight: 300;
-}
-
-.message-side {
-    display: inline-block;
-    padding: 0.3rem 0.8rem;
-    background-color: var(--color-accent-light);
-    border-radius: 12px;
-    font-size: 0.7rem;
-    color: var(--color-accent-dark);
-    font-weight: 300;
-    letter-spacing: 0.05em;
 }
 
 .pagination {

@@ -8,28 +8,24 @@ const Message = () => {
             name: '홍길동',
             date: '2024.01.01.13:13:10',
             message: '축하합니다~행복하게 사세요!',
-            side: 'groom',
         },
         {
             id: 2,
             name: '김철수',
             date: '2024.01.01.13:13:10',
             message: '정말 축하드립니다! 행복하세요 :)',
-            side: 'bride',
         },
         {
             id: 3,
             name: '이영희',
             date: '2024.01.01.13:13:10',
             message: '축하드려요 행복하게 사세요^^',
-            side: 'groom',
         },
     ]);
 
     const [newMessage, setNewMessage] = useState({
         name: '',
         message: '',
-        side: 'groom',
     });
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -52,11 +48,10 @@ const Message = () => {
                 second: '2-digit',
             }).replace(/\./g, '.').replace(/,/g, ''),
             message: newMessage.message,
-            side: newMessage.side,
         };
 
         setMessages([message, ...messages]);
-        setNewMessage({ name: '', message: '', side: 'groom' });
+        setNewMessage({ name: '', message: '' });
     };
 
     const displayedMessages = messages.slice(
@@ -71,38 +66,14 @@ const Message = () => {
                 <p className="message-subtitle">축하 메시지를 남겨주세요.</p>
 
                 <form className="message-form" onSubmit={handleSubmit}>
-                    <div className="form-row">
-                        <input
-                            type="text"
-                            placeholder="이름"
-                            value={newMessage.name}
-                            onChange={(e) => setNewMessage({ ...newMessage, name: e.target.value })}
-                            required
-                            className="message-input"
-                        />
-                        <div className="radio-group-inline">
-                            <label className="radio-label-inline">
-                                <input
-                                    type="radio"
-                                    name="side"
-                                    value="groom"
-                                    checked={newMessage.side === 'groom'}
-                                    onChange={(e) => setNewMessage({ ...newMessage, side: e.target.value })}
-                                />
-                                <span>신랑측</span>
-                            </label>
-                            <label className="radio-label-inline">
-                                <input
-                                    type="radio"
-                                    name="side"
-                                    value="bride"
-                                    checked={newMessage.side === 'bride'}
-                                    onChange={(e) => setNewMessage({ ...newMessage, side: e.target.value })}
-                                />
-                                <span>신부측</span>
-                            </label>
-                        </div>
-                    </div>
+                    <input
+                        type="text"
+                        placeholder="이름"
+                        value={newMessage.name}
+                        onChange={(e) => setNewMessage({ ...newMessage, name: e.target.value })}
+                        required
+                        className="message-input"
+                    />
                     <textarea
                         placeholder="메시지를 입력해주세요."
                         value={newMessage.message}
@@ -124,9 +95,6 @@ const Message = () => {
                                 <span className="message-date">{msg.date}</span>
                             </div>
                             <p className="message-text">{msg.message}</p>
-                            <span className="message-side">
-                                {msg.side === 'groom' ? '신랑측' : '신부측'}
-                            </span>
                         </div>
                     ))}
                 </div>
