@@ -31,7 +31,13 @@ const Location = () => {
                     const container = mapContainer.current;
                     const options = {
                         center: new window.kakao.maps.LatLng(latitude, longitude),
-                        level: 3
+                        level: 3, // 지도 확대 레벨 (숫자가 클수록 멀리 보임)
+                        
+                        // [수정] 지도 고정을 위한 옵션들
+                        draggable: false,             // 마우스 드래그, 모바일 터치로 지도 이동 막기
+                        zoomable: false,              // 마우스 휠, 핀치 줌으로 확대/축소 막기
+                        scrollwheel: false,           // 마우스 휠 막기 (중복 방어)
+                        disableDoubleClickZoom: true  // 더블 클릭 확대 막기
                     };
 
                     const map = new window.kakao.maps.Map(container, options);
@@ -43,11 +49,14 @@ const Location = () => {
                     });
                     marker.setMap(map);
 
-                    // 인포윈도우 생성
+                    // 인포윈도우 생성 (원하시면 주석 처리하여 마커만 남길 수 있습니다)
                     const infowindow = new window.kakao.maps.InfoWindow({
-                        content: '<div style="padding:10px;font-size:12px;text-align:center;min-width:80px;">난타호텔</div>'
+                        content: '<div style="padding:10px;font-size:12px;text-align:center;min-width:80px;font-weight:bold;">난타호텔</div>'
                     });
                     infowindow.open(map, marker);
+                    
+                    // [추가] 혹시 모를 줌 컨트롤러가 있다면 제거
+                    map.setZoomable(false);
                 });
             }
         };
@@ -88,28 +97,19 @@ const Location = () => {
                         console.error('API 키 확인:', KAKAO_APP_KEY ? `설정됨 (${KAKAO_APP_KEY.substring(0, 10)}...)` : '설정 안됨');
                         console.error('스크립트 URL:', script.src);
                         console.error('에러 상세:', error);
-                        console.error('해결 방법:');
-                        console.error('1. 카카오 개발자 콘솔(https://developers.kakao.com/)에서 Web 플랫폼 등록 확인');
-                        console.error('2. 사이트 도메인에 localhost 또는 현재 도메인 추가');
-                        console.error('3. JavaScript 키가 올바른지 확인');
                         
-                        // 실패 시 정적 지도 이미지 또는 안내 메시지 표시
+                        // 실패 시 네이버 지도 iframe으로 대체 시도
                         if (mapContainer.current) {
-                            // 카카오맵 정적 이미지 사용 (API 키 불필요)
-                            const staticMapUrl = `https://dapi.kakao.com/v2/maps/staticmap?center=${latitude},${longitude}&level=3&size=600x300&markers=size:mid,color:red|${latitude},${longitude}`;
-                            
+                            const naverMapUrl = `https://map.naver.com/v5/search/난타호텔/place/${longitude},${latitude}?c=${longitude},${latitude},15,0,0,0,dh`;
                             mapContainer.current.innerHTML = `
-                                <div style="position:relative;width:100%;height:100%;border-radius:12px;overflow:hidden;background:#f5f5f5;">
-                                    <img 
-                                        src="https://dapi.kakao.com/v2/maps/staticmap?center=${latitude},${longitude}&level=3&size=600x300&markers=size:mid,color:red|${latitude},${longitude}" 
-                                        alt="난타호텔 위치"
-                                        style="width:100%;height:100%;object-fit:cover;"
-                                        onerror="this.parentElement.innerHTML='<div style=\\'display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#666;font-size:0.9rem;padding:2rem;text-align:center;\\'><p style=\\'margin-bottom:1rem;\\'>지도를 불러올 수 없습니다.</p><p style=\\'font-size:0.85rem;color:#999;\\'>아래 버튼을 클릭하여 지도를 확인하세요.</p></div>'"
-                                    />
-                                    <div style="position:absolute;bottom:10px;right:10px;background:rgba(255,255,255,0.9);padding:8px 12px;border-radius:6px;font-size:0.8rem;color:#666;">
-                                        난타호텔
-                                    </div>
-                                </div>
+                                <iframe 
+                                    src="${naverMapUrl}" 
+                                    width="100%" 
+                                    height="100%" 
+                                    style="border:0;border-radius:12px;pointer-events:none;" 
+                                    allowfullscreen 
+                                    loading="lazy"
+                                ></iframe>
                             `;
                         }
                     };
@@ -121,7 +121,7 @@ const Location = () => {
             // API 키가 없을 경우 안내 메시지 표시
             if (mapContainer.current) {
                 mapContainer.current.innerHTML = `
-                    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#666;font-size:0.9rem;padding:2rem;text-align:center;">
+                    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#666;font-size:0.9rem;padding:2rem;text-align:center;background-color:#f8f8f8;border-radius:12px;">
                         <p style="margin-bottom:1rem;">지도를 표시하려면 카카오맵 API 키가 필요합니다.</p>
                         <p style="font-size:0.85rem;color:#999;">아래 버튼을 클릭하여 지도를 확인하세요.</p>
                     </div>
@@ -156,13 +156,19 @@ const Location = () => {
                 <h2 className="section-title">location</h2>
                 <h3 className="venue-name">난타호텔</h3>
                 <p className="venue-address">제주 제주시 선돌목동길 56-26 호텔난타</p>
-                <p className="venue-phone">Tel. 02-1234-5678</p>
+                <p className="venue-phone">Tel. 064-727-0800</p> 
 
                 <div className="map-container">
                     <div 
                         ref={mapContainer}
                         className="map-placeholder"
-                        style={{ width: '100%', height: '300px' }}
+                        style={{ 
+                            width: '100%', 
+                            height: '300px',
+                            borderRadius: '12px', // [추가] 모서리 둥글게
+                            overflow: 'hidden',    // [추가] 자식이 튀어나오지 않게
+                            border: '1px solid #e0e0e0' // [추가] 연한 테두리
+                        }}
                     ></div>
                     <div className="map-buttons">
                         <button className="map-btn" onClick={() => handleMapClick('naver')}>
@@ -185,11 +191,11 @@ const Location = () => {
                     </div>
                     <div className="transport-item">
                         <h4>버스 이용</h4>
-                        <p>제주시내버스 이용 후 난타호텔 정류장 하차</p>
+                        <p>제주시내버스 473번 이용 후 난타호텔 정류장 하차</p>
                     </div>
                     <div className="transport-item">
                         <h4>주차 안내</h4>
-                        <p>호텔 주차장 이용 가능</p>
+                        <p>호텔 내 넓은 주차장 이용 가능</p>
                     </div>
                 </div>
             </div>
