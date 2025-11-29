@@ -2,7 +2,8 @@ node_modules
 dist
 .git
 .gitignore
-.env
+# .env 파일은 빌드 시 필요하므로 제외하지 않음 (보안 주의: 실제 배포 시 다른 방법 사용 권장)
+# .env
 .env.local
 .env.*.local
 npm-debug.log*
