@@ -52,6 +52,7 @@
     display: flex;
     align-items: center;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    position: relative;
 }
 
 .hero-image-placeholder {
@@ -68,6 +69,14 @@
     color: var(--color-text-lighter);
     font-size: 0.9rem;
     letter-spacing: 0.1em;
+}
+
+.hero-image {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    display: block;
+    aspect-ratio: 3 / 4;
 }
 
 .hero-bottom {

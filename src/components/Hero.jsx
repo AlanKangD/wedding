@@ -4,6 +4,9 @@ import './Hero.css';
 const Hero = () => {
     // 웹사이트 참고: 2024년 10월 26일 토요일 오후 1시 30분
     const weddingDate = '2024-10-26T13:30:00';
+    
+    // 메인 사진 경로 설정
+    const mainImage = '/main-photo.jpg'; // public 폴더의 이미지
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -29,9 +32,17 @@ const Hero = () => {
             </div>
 
             <div className="hero-image-container">
-                <div className="hero-image-placeholder">
-                    <span>메인 사진</span>
-                </div>
+                {mainImage ? (
+                    <img 
+                        src={mainImage} 
+                        alt="메인 사진" 
+                        className="hero-image"
+                    />
+                ) : (
+                    <div className="hero-image-placeholder">
+                        <span>메인 사진</span>
+                    </div>
+                )}
             </div>
 
             <div className="hero-bottom">
