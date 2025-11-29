@@ -132,22 +132,55 @@ const Location = () => {
 
     const handleMapClick = (mapType) => {
         const address = encodeURIComponent('제주 제주시 선돌목동길 56-26 호텔난타');
+        const placeName = encodeURIComponent('난타호텔');
         let url = '';
+        
+        // 카카오톡 인앱 브라우저 감지
+        const isKakaoTalk = /KAKAOTALK/i.test(navigator.userAgent);
+        const isInApp = /(iPhone|iPod|iPad|Android)/i.test(navigator.userAgent) && 
+                       !window.MSStream && 
+                       !/CriOS|FxiOS|OPiOS/i.test(navigator.userAgent);
         
         switch(mapType) {
             case 'naver':
-                url = `https://map.naver.com/v5/search/${address}`;
+                // 네이버 지도: 카카오톡 인앱 브라우저 호환 링크
+                // 좌표 기반 검색으로 변경 (더 안정적)
+                url = `https://m.map.naver.com/map2/search?query=${placeName}&sm=hty&style=v5&center=${longitude},${latitude}&level=3`;
+                
+                // 카카오톡 인앱 브라우저에서는 location.href 사용
+                if (isKakaoTalk || isInApp) {
+                    window.location.href = url;
+                    return;
+                }
                 break;
             case 'kakao':
-                url = `https://map.kakao.com/link/map/난타호텔,${latitude},${longitude}`;
+                // 카카오맵: 카카오톡 인앱 브라우저 호환 링크
+                url = `https://map.kakao.com/link/map/${placeName},${latitude},${longitude}`;
+                
+                // 카카오톡 인앱 브라우저에서는 location.href 사용
+                if (isKakaoTalk || isInApp) {
+                    window.location.href = url;
+                    return;
+                }
                 break;
             case 'tmap':
+                // 티맵: 카카오톡 인앱 브라우저 호환 링크
                 url = `https://tmapapi.sktelecom.com/main/shortUrl.do?name=${address}`;
+                
+                // 카카오톡 인앱 브라우저에서는 location.href 사용
+                if (isKakaoTalk || isInApp) {
+                    window.location.href = url;
+                    return;
+                }
                 break;
             default:
                 return;
         }
-        window.open(url, '_blank');
+        
+        // 일반 브라우저에서는 새 창으로 열기
+        if (url) {
+            window.open(url, '_blank', 'noopener,noreferrer');
+        }
     };
 
     return (
