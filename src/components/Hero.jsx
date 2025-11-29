@@ -2,8 +2,8 @@ import Countdown from './Countdown';
 import './Hero.css';
 
 const Hero = () => {
-    // 웹사이트 참고: 2024년 10월 26일 토요일 오후 1시 30분
-    const weddingDate = '2024-10-26T13:30:00';
+    // 2026년 4월 5일 일요일 오후 1시 30분
+    const weddingDate = '2026-04-05T13:30:00';
     
     // 메인 사진 경로 설정
     const mainImage = '/main-photo.jpg'; // public 폴더의 이미지
@@ -47,13 +47,13 @@ const Hero = () => {
 
             <div className="hero-bottom">
                 <h1 className="hero-names">
-                    신랑 <span className="slash">/</span> 신부
+                    강동원 <span className="slash">/</span> 오다영
                 </h1>
                 <p className="hero-datetime">
-                    {weekday}요일 오후 1시 30분
+                    {weekday}요일  11시 30분
                 </p>
-                <p className="hero-venue">서울시 강남구 테헤란로 742</p>
-                <p className="hero-venue-detail">그랜드컨벤션웨딩홀 6층 그랜드홀</p>
+                <p className="hero-venue">제주특별자치도 제주시</p>
+                <p className="hero-venue-detail">난타호텔</p>
             </div>
         </section>
     );

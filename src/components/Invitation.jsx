@@ -19,11 +19,11 @@ const Invitation = () => {
                     <div className="names-row">
                         <div className="person">
                             <span className="role">신랑</span>
-                            <span className="name">신랑이름</span>
+                            <span className="name">강동원</span>
                         </div>
                         <div className="person">
                             <span className="role">신부</span>
-                            <span className="name">신부이름</span>
+                            <span className="name">오다영</span>
                         </div>
                     </div>
                     <div className="parents-section">
