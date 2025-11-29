@@ -1,27 +1,11 @@
-import { useState } from 'react';
+import { off, onValue, push, ref } from 'firebase/database';
+import { useEffect, useState } from 'react';
+import { database } from '../firebase';
 import './Message.css';
 
 const Message = () => {
-    const [messages, setMessages] = useState([
-        {
-            id: 1,
-            name: '홍길동',
-            date: '2024.01.01.13:13:10',
-            message: '축하합니다~행복하게 사세요!',
-        },
-        {
-            id: 2,
-            name: '김철수',
-            date: '2024.01.01.13:13:10',
-            message: '정말 축하드립니다! 행복하세요 :)',
-        },
-        {
-            id: 3,
-            name: '이영희',
-            date: '2024.01.01.13:13:10',
-            message: '축하드려요 행복하게 사세요^^',
-        },
-    ]);
+    const [messages, setMessages] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     const [newMessage, setNewMessage] = useState({
         name: '',
@@ -32,14 +16,48 @@ const Message = () => {
     const messagesPerPage = 5;
     const totalPages = Math.ceil(messages.length / messagesPerPage);
 
-    const handleSubmit = (e) => {
+    // Firebase에서 메시지 불러오기
+    useEffect(() => {
+        const messagesRef = ref(database, 'messages');
+        
+        // 실시간으로 메시지 변경 감지
+        const unsubscribe = onValue(messagesRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                // Firebase에서 가져온 데이터를 배열로 변환 (최신순 정렬)
+                const messagesArray = Object.keys(data)
+                    .map(key => ({
+                        id: key,
+                        ...data[key]
+                    }))
+                    .sort((a, b) => {
+                        // 날짜 기준 내림차순 정렬 (최신순)
+                        return new Date(b.date) - new Date(a.date);
+                    });
+                setMessages(messagesArray);
+            } else {
+                setMessages([]);
+            }
+            setLoading(false);
+        }, (error) => {
+            console.error('메시지 불러오기 실패:', error);
+            setLoading(false);
+        });
+
+        // 컴포넌트 언마운트 시 리스너 제거
+        return () => {
+            off(messagesRef);
+        };
+    }, []);
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (!newMessage.name || !newMessage.message) return;
 
         const message = {
-            id: messages.length + 1,
             name: newMessage.name,
-            date: new Date().toLocaleString('ko-KR', {
+            date: new Date().toISOString(), // ISO 형식으로 저장
+            displayDate: new Date().toLocaleString('ko-KR', {
                 year: 'numeric',
                 month: '2-digit',
                 day: '2-digit',
@@ -50,8 +68,15 @@ const Message = () => {
             message: newMessage.message,
         };
 
-        setMessages([message, ...messages]);
-        setNewMessage({ name: '', message: '' });
+        try {
+            // Firebase에 메시지 추가
+            const messagesRef = ref(database, 'messages');
+            await push(messagesRef, message);
+            setNewMessage({ name: '', message: '' });
+        } catch (error) {
+            console.error('메시지 저장 실패:', error);
+            alert('메시지 저장에 실패했습니다. 다시 시도해주세요.');
+        }
     };
 
     const displayedMessages = messages.slice(
@@ -88,15 +113,25 @@ const Message = () => {
                 </form>
 
                 <div className="messages-list">
-                    {displayedMessages.map((msg) => (
+                    {loading ? (
+                        <div style={{ textAlign: 'center', padding: '2rem', color: '#999' }}>
+                            메시지를 불러오는 중...
+                        </div>
+                    ) : displayedMessages.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '2rem', color: '#999' }}>
+                            아직 등록된 메시지가 없습니다.
+                        </div>
+                    ) : (
+                        displayedMessages.map((msg) => (
                         <div key={msg.id} className="message-item">
                             <div className="message-header">
                                 <span className="message-name">{msg.name}</span>
-                                <span className="message-date">{msg.date}</span>
+                                <span className="message-date">{msg.displayDate || msg.date}</span>
                             </div>
                             <p className="message-text">{msg.message}</p>
                         </div>
-                    ))}
+                        ))
+                    )}
                 </div>
 
                 {totalPages > 1 && (
