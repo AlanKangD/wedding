@@ -85,7 +85,7 @@ const Location = () => {
                     // 새 스크립트 추가
                     const script = document.createElement('script');
                     script.async = true;
-                    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_APP_KEY}&autoload=false`;
+                    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_APP_KEY}&autoload=false&libraries=services`;
                     
                     script.onload = () => {
                         console.log('카카오맵 스크립트 로드 성공');
