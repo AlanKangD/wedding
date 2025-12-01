@@ -89,27 +89,43 @@ const Location = () => {
                     
                     script.onload = () => {
                         console.log('카카오맵 스크립트 로드 성공');
-                        initMap();
+                        console.log('현재 도메인:', window.location.hostname);
+                        console.log('API 키:', KAKAO_APP_KEY ? `${KAKAO_APP_KEY.substring(0, 10)}...` : '없음');
+                        
+                        // 스크립트 로드 후 약간의 지연을 두고 초기화
+                        setTimeout(() => {
+                            if (window.kakao && window.kakao.maps) {
+                                initMap();
+                            } else {
+                                console.error('카카오맵 객체를 찾을 수 없습니다.');
+                                if (mapContainer.current) {
+                                    mapContainer.current.innerHTML = `
+                                        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#666;font-size:0.9rem;padding:2rem;text-align:center;background-color:#f8f8f8;border-radius:12px;">
+                                            <p style="margin-bottom:1rem;color:#d32f2f;font-weight:bold;">카카오맵을 초기화할 수 없습니다.</p>
+                                            <p style="font-size:0.85rem;color:#999;">API 키의 플랫폼 설정을 확인하세요.</p>
+                                        </div>
+                                    `;
+                                }
+                            }
+                        }, 100);
                     };
                     
                     script.onerror = (error) => {
                         console.error('카카오맵 스크립트 로드 실패:', error);
                         console.error('API 키 확인:', KAKAO_APP_KEY ? `설정됨 (${KAKAO_APP_KEY.substring(0, 10)}...)` : '설정 안됨');
                         console.error('스크립트 URL:', script.src);
+                        console.error('현재 도메인:', window.location.hostname);
                         console.error('에러 상세:', error);
                         
-                        // 실패 시 네이버 지도 iframe으로 대체 시도
+                        // 에러 메시지 표시
                         if (mapContainer.current) {
-                            const naverMapUrl = `https://map.naver.com/v5/search/난타호텔/place/${longitude},${latitude}?c=${longitude},${latitude},15,0,0,0,dh`;
                             mapContainer.current.innerHTML = `
-                                <iframe 
-                                    src="${naverMapUrl}" 
-                                    width="100%" 
-                                    height="100%" 
-                                    style="border:0;border-radius:12px;pointer-events:none;" 
-                                    allowfullscreen 
-                                    loading="lazy"
-                                ></iframe>
+                                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#666;font-size:0.9rem;padding:2rem;text-align:center;background-color:#f8f8f8;border-radius:12px;">
+                                    <p style="margin-bottom:1rem;color:#d32f2f;font-weight:bold;">지도를 불러올 수 없습니다.</p>
+                                    <p style="font-size:0.85rem;color:#999;margin-bottom:0.5rem;">카카오맵 API 키의 플랫폼 설정을 확인하세요.</p>
+                                    <p style="font-size:0.85rem;color:#999;margin-bottom:0.5rem;">현재 도메인: ${window.location.hostname}</p>
+                                    <p style="font-size:0.85rem;color:#999;">아래 버튼을 클릭하여 지도를 확인하세요.</p>
+                                </div>
                             `;
                         }
                     };
