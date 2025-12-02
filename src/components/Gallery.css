@@ -12,7 +12,7 @@
 .main-image-container {
     position: relative;
     width: 100%;
-    padding-bottom: 75%;
+    padding-bottom: 150%; /* 높이 증가 (75% -> 120%) */
     background-color: var(--color-bg);
     margin-bottom: 1.5rem;
     overflow: hidden;
