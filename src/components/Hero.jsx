@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import Countdown from './Countdown';
 import './Hero.css';
 
@@ -7,6 +8,8 @@ const Hero = () => {
     
     // 메인 사진 경로 설정
     const mainImage = '/main-photo.jpg'; // public 폴더의 이미지
+    const [imageLoaded, setImageLoaded] = useState(false);
+    const [imageError, setImageError] = useState(false);
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -18,6 +21,16 @@ const Hero = () => {
     };
 
     const { month, day, weekday } = formatDate(weddingDate);
+
+    // 이미지 프리로딩
+    useEffect(() => {
+        if (mainImage) {
+            const img = new Image();
+            img.src = mainImage;
+            img.onload = () => setImageLoaded(true);
+            img.onerror = () => setImageError(true);
+        }
+    }, [mainImage]);
 
     return (
         <section className="hero">
@@ -33,11 +46,20 @@ const Hero = () => {
 
             <div className="hero-image-container">
                 {mainImage ? (
-                    <img 
-                        src={mainImage} 
-                        alt="메인 사진" 
-                        className="hero-image"
-                    />
+                    <>
+                        {!imageLoaded && !imageError && (
+                            <div className="hero-image-placeholder">
+                                <div className="image-loading-spinner"></div>
+                            </div>
+                        )}
+                        <img 
+                            src={mainImage} 
+                            alt="메인 사진" 
+                            className={`hero-image ${imageLoaded ? 'loaded' : 'loading'}`}
+                            loading="eager"
+                            decoding="async"
+                        />
+                    </>
                 ) : (
                     <div className="hero-image-placeholder">
                         <span>메인 사진</span>
