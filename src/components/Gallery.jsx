@@ -99,7 +99,7 @@ const Gallery = () => {
                         </div>
 
                         <p className="gallery-caption">
-                            갤러리 사진을 확인해주세요.
+                            
                         </p>
                     </div>
                 ) : (

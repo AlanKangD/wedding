@@ -29,22 +29,22 @@ const Invitation = () => {
                     <div className="parents-section">
                         <div className="parents-group">
                             <div className="parent">
-                                <span className="parent-role">아버지</span>
+                                <span className="parent-role">신랑 아버지</span>
                                 <span className="parent-name">강문봉</span>
                             </div>
                             <div className="parent">
-                                <span className="parent-role">어머니</span>
+                                <span className="parent-role">신랑 어머니</span>
                                 <span className="parent-name">김미영</span>
                             </div>
                         </div>
-                        <span className="parents-connector">의</span>
+                        <span className="parents-connector"></span>
                         <div className="parents-group">
                             <div className="parent">
-                                <span className="parent-role">아버지</span>
+                                <span className="parent-role">신부 아버지</span>
                                 <span className="parent-name">오명훈</span>
                             </div>
                             <div className="parent">
-                                <span className="parent-role">어머니</span>
+                                <span className="parent-role">신부 어머니</span>
                                 <span className="parent-name">김연숙</span>
                             </div>
                         </div>
