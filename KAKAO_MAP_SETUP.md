@@ -60,3 +60,4 @@ https://developers.kakao.com/
 2. **포트 번호 포함**: `localhost:5173`과 `localhost`는 다른 도메인으로 인식됩니다
 3. **적용 시간**: 도메인 추가 후 즉시 적용되지 않을 수 있으니 몇 분 기다려보세요
 
+

@@ -60,7 +60,7 @@ const RSVP = () => {
                                 required
                                 placeholder="이름을 입력해주세요"
                             />
-                        </div>
+                    </div>
 
                         <div className="form-group">
                             <label>참석 여부</label>
@@ -87,8 +87,8 @@ const RSVP = () => {
                                     />
                                     <span>참석하지 못합니다</span>
                                 </label>
-                            </div>
-                        </div>
+                    </div>
+                </div>
 
                         {formData.attendance === 'yes' && (
                             <div className="form-group">

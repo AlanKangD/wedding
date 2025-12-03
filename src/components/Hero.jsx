@@ -69,13 +69,13 @@ const Hero = () => {
 
             <div className="hero-bottom">
                 <h1 className="hero-names">
-                    강동원 <span className="slash">/</span> 오다영
+                    동원 <span className="slash"> ❤️ </span> 다영
                 </h1>
                 <p className="hero-datetime">
-                    {weekday}요일  11시 30분
+                    2026년 04월 05일, {weekday}요일 오전 11시 30분
                 </p>
-                <p className="hero-venue">제주특별자치도 제주시</p>
-                <p className="hero-venue-detail">난타호텔</p>
+                <p className="hero-venue">난타호텔 컨벤션홀 &
+                레스토랑</p>
             </div>
         </section>
     );

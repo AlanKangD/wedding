@@ -140,14 +140,17 @@
 .hero-venue {
     font-size: 0.95rem;
     color: var(--color-text-light);
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.4rem;
     font-weight: 300;
 }
 
 .hero-venue-detail {
-    font-size: 0.9rem;
-    color: var(--color-text-lighter);
-    font-weight: 300;
+    font-family: var(--font-serif);
+    font-size: 1.4rem;
+    color: var(--color-text);
+    margin-bottom: 0.8rem;
+    font-weight: 400;
+    letter-spacing: 0.02em;
 }
 
 @keyframes fadeInUp {

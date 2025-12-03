@@ -83,3 +83,4 @@ nginx.conf에 이미지 압축 설정 추가 (이미 적용됨)
 2. Lighthouse: 이미지 최적화 점수 확인
 3. Performance 탭: 렌더링 성능 확인
 
+
