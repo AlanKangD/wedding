@@ -23,7 +23,6 @@ const RSVP = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         // 여기에 실제 서버 전송 로직 추가
-        console.log('RSVP 데이터:', formData);
         setSubmitted(true);
         setTimeout(() => {
             setSubmitted(false);

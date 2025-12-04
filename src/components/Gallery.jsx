@@ -75,7 +75,6 @@ const Gallery = () => {
                     };
                     
                     img.onerror = () => {
-                        console.warn(`이미지 로드 실패: ${photo}`);
                         resolve();
                     };
                     

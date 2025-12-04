@@ -12,22 +12,9 @@ const firebaseConfig = {
     appId: import.meta.env.VITE_FIREBASE_APP_ID || '',
 };
 
-// 환경 변수 확인 (개발 모드에서만)
-if (import.meta.env.DEV) {
-    console.log('Firebase Config:', {
-        apiKey: firebaseConfig.apiKey ? `${firebaseConfig.apiKey.substring(0, 10)}...` : 'missing',
-        authDomain: firebaseConfig.authDomain || 'missing',
-        databaseURL: firebaseConfig.databaseURL || 'missing',
-        projectId: firebaseConfig.projectId || 'missing',
-        storageBucket: firebaseConfig.storageBucket || 'missing',
-        messagingSenderId: firebaseConfig.messagingSenderId || 'missing',
-        appId: firebaseConfig.appId ? `${firebaseConfig.appId.substring(0, 10)}...` : 'missing',
-    });
-}
-
 // 필수 값 확인
 if (!firebaseConfig.projectId || !firebaseConfig.databaseURL) {
-    console.error('Firebase 설정이 완전하지 않습니다. 환경 변수를 확인하세요.');
+    // Firebase 설정이 완전하지 않음
 }
 
 // Firebase 초기화
@@ -42,19 +29,7 @@ try {
     
     app = initializeApp(firebaseConfig);
     database = getDatabase(app);
-    
-    console.log('Firebase 초기화 성공');
 } catch (error) {
-    console.error('Firebase 초기화 실패:', error);
-    console.error('Firebase Config:', {
-        hasApiKey: !!firebaseConfig.apiKey,
-        hasAuthDomain: !!firebaseConfig.authDomain,
-        hasDatabaseURL: !!firebaseConfig.databaseURL,
-        hasProjectId: !!firebaseConfig.projectId,
-        hasStorageBucket: !!firebaseConfig.storageBucket,
-        hasMessagingSenderId: !!firebaseConfig.messagingSenderId,
-        hasAppId: !!firebaseConfig.appId,
-    });
     throw error;
 }
 

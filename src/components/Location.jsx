@@ -12,12 +12,6 @@ const Location = () => {
         // 카카오맵 JavaScript API 키
         const KAKAO_APP_KEY = import.meta.env.VITE_KAKAO_MAP_API_KEY || '';
         
-        // 디버깅: API 키 확인
-        if (KAKAO_APP_KEY) {
-            console.log('카카오맵 API 키가 설정되었습니다.');
-        } else {
-            console.warn('카카오맵 API 키가 설정되지 않았습니다. .env 파일에 VITE_KAKAO_MAP_API_KEY를 추가하세요.');
-        }
         
         if (!mapContainer.current) return;
 
@@ -83,22 +77,16 @@ const Location = () => {
                     }
                 } else {
                     // 새 스크립트 추가
-                    console.log('KAKAO_APP_KEY:', KAKAO_APP_KEY);
                     const script = document.createElement('script');
                     script.async = true;
                     script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_APP_KEY}&autoload=false&libraries=services`;
                     
                     script.onload = () => {
-                        console.log('카카오맵 스크립트 로드 성공');
-                        console.log('현재 도메인:', window.location.hostname);
-                        console.log('API 키:', KAKAO_APP_KEY ? `${KAKAO_APP_KEY.substring(0, 10)}...` : '없음');
-                        
                         // 스크립트 로드 후 약간의 지연을 두고 초기화
                         setTimeout(() => {
                             if (window.kakao && window.kakao.maps) {
                                 initMap();
                             } else {
-                                console.error('카카오맵 객체를 찾을 수 없습니다.');
                                 if (mapContainer.current) {
                                     mapContainer.current.innerHTML = `
                                         <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#666;font-size:0.9rem;padding:2rem;text-align:center;background-color:#f8f8f8;border-radius:12px;">
@@ -112,15 +100,6 @@ const Location = () => {
                     };
                     
                     script.onerror = (error) => {
-                        console.warn('카카오맵 스크립트 로드 실패:', error);
-                        console.warn('API 키 확인:', KAKAO_APP_KEY ? `설정됨 (${KAKAO_APP_KEY.substring(0, 10)}...)` : '설정 안됨');
-                        console.warn('현재 도메인:', window.location.hostname);
-                        console.warn('카카오 개발자 콘솔에서 다음 도메인을 등록하세요:');
-                        console.warn('  - http://localhost:5173');
-                        console.warn('  - http://localhost:5174');
-                        console.warn('  - http://localhost:3000');
-                        console.warn('  - http://' + window.location.hostname + (window.location.port ? ':' + window.location.port : ''));
-                        
                         // 정적 지도 이미지로 대체 (카카오 스태틱 맵 API 사용)
                         if (mapContainer.current) {
                             const staticMapUrl = `https://dapi.kakao.com/v2/maps/staticmap?markers=${latitude},${longitude}&level=3&size=600x300&appkey=${KAKAO_APP_KEY}`;

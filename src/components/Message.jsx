@@ -40,7 +40,6 @@ const Message = () => {
             }
             setLoading(false);
         }, (error) => {
-            console.error('메시지 불러오기 실패:', error);
             setLoading(false);
         });
 
@@ -74,7 +73,6 @@ const Message = () => {
             await push(messagesRef, message);
             setNewMessage({ name: '', message: '' });
         } catch (error) {
-            console.error('메시지 저장 실패:', error);
             alert('메시지 저장에 실패했습니다. 다시 시도해주세요.');
         }
     };
