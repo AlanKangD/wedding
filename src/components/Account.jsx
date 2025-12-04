@@ -119,14 +119,34 @@ const Account = () => {
     };
 
     const openKakaoPay = (accountInfo) => {
+        console.log('카카오페이 버튼 클릭됨', accountInfo);
+        
         const { bank, account, holder } = accountInfo;
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        const isKakaoTalk = /KAKAOTALK/i.test(navigator.userAgent);
+        
+        console.log('환경 확인:', {
+            isMobile,
+            isKakaoTalk,
+            userAgent: navigator.userAgent,
+            bank,
+            account,
+            holder
+        });
+        
+        const bankCode = getBankCode(bank);
+        const formattedAccount = formatAccountNumber(account);
+        const encodedName = encodeURIComponent(holder);
+        
+        console.log('변환된 정보:', {
+            bankCode,
+            formattedAccount,
+            encodedName
+        });
         
         // 계좌번호를 클립보드에 복사
         navigator.clipboard.writeText(account).then(() => {
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            const bankCode = getBankCode(bank);
-            const formattedAccount = formatAccountNumber(account);
-            const encodedName = encodeURIComponent(holder);
+            console.log('계좌번호 복사 성공:', account);
             
             if (isMobile) {
                 // 모바일: 카카오페이 앱 딥링크 시도 (계좌 정보 포함)
@@ -137,20 +157,32 @@ const Account = () => {
                     deepLink = `kakaotalk://kakaopay/money/send?bank=${bankCode}&account=${formattedAccount}&name=${encodedName}`;
                 }
                 
-                // 딥링크 시도
-                window.location.href = deepLink;
+                console.log('딥링크 URL:', deepLink);
                 
-                // 앱이 없거나 딥링크가 작동하지 않으면 웹으로 이동
-                setTimeout(() => {
-                    window.open('https://kakaopay.me', '_blank');
-                }, 1000);
+                // 카카오톡 인앱 브라우저에서는 location.href 사용
+                if (isKakaoTalk) {
+                    console.log('카카오톡 인앱 브라우저에서 실행');
+                    window.location.href = deepLink;
+                } else {
+                    // 일반 모바일 브라우저
+                    console.log('일반 모바일 브라우저에서 실행');
+                    window.location.href = deepLink;
+                    
+                    // 앱이 없거나 딥링크가 작동하지 않으면 웹으로 이동
+                    setTimeout(() => {
+                        console.log('딥링크 실패, 웹으로 이동');
+                        window.open('https://kakaopay.me', '_blank');
+                    }, 1000);
+                }
             } else {
                 // 데스크톱: 카카오페이 웹으로 이동
+                console.log('데스크톱 환경, 웹으로 이동');
                 window.open('https://kakaopay.me', '_blank');
             }
             
             alert('계좌번호가 복사되었습니다. 카카오페이에서 송금해주세요.');
-        }).catch(() => {
+        }).catch((error) => {
+            console.error('계좌번호 복사 실패:', error);
             alert('계좌번호 복사에 실패했습니다.');
         });
     };
@@ -196,8 +228,14 @@ const Account = () => {
                             <button
                                 className="kakaopay-btn"
                                 onClick={(e) => {
+                                    e.preventDefault();
                                     e.stopPropagation();
+                                    console.log('버튼 클릭 이벤트 발생', account);
                                     openKakaoPay(account);
+                                }}
+                                onTouchStart={(e) => {
+                                    e.stopPropagation();
+                                    console.log('터치 이벤트 발생');
                                 }}
                             >
                                 <span>카카오페이로 보내기</span>
