@@ -54,10 +54,20 @@ const Account = () => {
 
     const toggleItem = (side, index) => {
         const key = `${side}-${index}`;
-        setExpandedItems(prev => ({
-            ...prev,
-            [key]: !prev[key]
-        }));
+        const isCurrentlyExpanded = expandedItems[key];
+        
+        // 현재 항목이 열려있으면 닫기, 닫혀있으면 다른 항목들을 모두 닫고 현재 항목만 열기
+        if (isCurrentlyExpanded) {
+            // 현재 항목이 열려있으면 닫기
+            setExpandedItems(prev => {
+                const newState = { ...prev };
+                delete newState[key];
+                return newState;
+            });
+        } else {
+            // 현재 항목이 닫혀있으면 다른 항목들을 모두 닫고 현재 항목만 열기
+            setExpandedItems({ [key]: true });
+        }
     };
 
     const copyToClipboard = (text) => {
