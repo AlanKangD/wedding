@@ -83,6 +83,7 @@ const Location = () => {
                     }
                 } else {
                     // 새 스크립트 추가
+                    console.log('KAKAO_APP_KEY:', KAKAO_APP_KEY);
                     const script = document.createElement('script');
                     script.async = true;
                     script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_APP_KEY}&autoload=false&libraries=services`;
@@ -111,22 +112,57 @@ const Location = () => {
                     };
                     
                     script.onerror = (error) => {
-                        console.error('카카오맵 스크립트 로드 실패:', error);
-                        console.error('API 키 확인:', KAKAO_APP_KEY ? `설정됨 (${KAKAO_APP_KEY.substring(0, 10)}...)` : '설정 안됨');
-                        console.error('스크립트 URL:', script.src);
-                        console.error('현재 도메인:', window.location.hostname);
-                        console.error('에러 상세:', error);
+                        console.warn('카카오맵 스크립트 로드 실패:', error);
+                        console.warn('API 키 확인:', KAKAO_APP_KEY ? `설정됨 (${KAKAO_APP_KEY.substring(0, 10)}...)` : '설정 안됨');
+                        console.warn('현재 도메인:', window.location.hostname);
+                        console.warn('카카오 개발자 콘솔에서 다음 도메인을 등록하세요:');
+                        console.warn('  - http://localhost:5173');
+                        console.warn('  - http://localhost:5174');
+                        console.warn('  - http://localhost:3000');
+                        console.warn('  - http://' + window.location.hostname + (window.location.port ? ':' + window.location.port : ''));
                         
-                        // 에러 메시지 표시
+                        // 정적 지도 이미지로 대체 (카카오 스태틱 맵 API 사용)
                         if (mapContainer.current) {
-                            mapContainer.current.innerHTML = `
-                                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#666;font-size:0.9rem;padding:2rem;text-align:center;background-color:#f8f8f8;border-radius:12px;">
-                                    <p style="margin-bottom:1rem;color:#d32f2f;font-weight:bold;">지도를 불러올 수 없습니다.</p>
-                                    <p style="font-size:0.85rem;color:#999;margin-bottom:0.5rem;">카카오맵 API 키의 플랫폼 설정을 확인하세요.</p>
-                                    <p style="font-size:0.85rem;color:#999;margin-bottom:0.5rem;">현재 도메인: ${window.location.hostname}</p>
-                                    <p style="font-size:0.85rem;color:#999;">아래 버튼을 클릭하여 지도를 확인하세요.</p>
-                                </div>
-                            `;
+                            const staticMapUrl = `https://dapi.kakao.com/v2/maps/staticmap?markers=${latitude},${longitude}&level=3&size=600x300&appkey=${KAKAO_APP_KEY}`;
+                            
+                            // 정적 지도 이미지 시도, 실패 시 네이버 정적 지도 사용
+                            const img = new Image();
+                            img.onload = () => {
+                                if (mapContainer.current) {
+                                    mapContainer.current.innerHTML = `
+                                        <img 
+                                            src="${staticMapUrl}" 
+                                            alt="난타호텔 위치" 
+                                            style="width:100%;height:100%;object-fit:cover;border-radius:12px;cursor:pointer;"
+                                            onclick="window.open('https://map.kakao.com/link/map/난타호텔,${latitude},${longitude}', '_blank')"
+                                        />
+                                    `;
+                                }
+                            };
+                            img.onerror = () => {
+                                // 네이버 정적 지도로 대체
+                                const naverStaticMapUrl = `https://naveropenapi.apigw.ntruss.com/map-static/v2/raster?w=600&h=300&markers=type:d|size:mid|pos:${longitude} ${latitude}|label:난타호텔&center=${longitude},${latitude}&level=15&X-NCP-APIGW-API-KEY-ID=`;
+                                
+                                // 또는 구글 스태틱 맵 사용 (무료, API 키 불필요)
+                                const googleStaticMapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=15&size=600x300&markers=color:red|label:N|${latitude},${longitude}&language=ko`;
+                                
+                                if (mapContainer.current) {
+                                    mapContainer.current.innerHTML = `
+                                        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:linear-gradient(135deg, #e8e5e1 0%, #ddd9d4 100%);border-radius:12px;padding:2rem;">
+                                            <img 
+                                                src="${googleStaticMapUrl}" 
+                                                alt="난타호텔 위치" 
+                                                style="width:100%;height:100%;object-fit:cover;border-radius:8px;cursor:pointer;margin-bottom:1rem;"
+                                                onclick="window.open('https://map.kakao.com/link/map/난타호텔,${latitude},${longitude}', '_blank')"
+                                            />
+                                            <p style="font-size:0.85rem;color:#666;text-align:center;margin:0;">
+                                                지도를 클릭하면 상세 위치를 확인할 수 있습니다.
+                                            </p>
+                                        </div>
+                                    `;
+                                }
+                            };
+                            img.src = staticMapUrl;
                         }
                     };
                     
