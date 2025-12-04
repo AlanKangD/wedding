@@ -28,20 +28,20 @@ const Account = () => {
     const brideAccounts = [
         {
             name: '오다영',
-            bank: '',
-            account: '',
+            bank: '농협',
+            account: '178408-51-002856',
             holder: '오다영'
         },
         {
             name: '오명훈',
-            bank: '',
-            account: '',
+            bank: '농협',
+            account: '178408-51-002856',
             holder: '오명훈'
         },
         {
             name: '김연숙',
-            bank: '',
-            account: '',
+            bank: '농협',
+            account: '178408-51-002856',
             holder: '김연숙'
         }
     ];
@@ -65,6 +65,32 @@ const Account = () => {
             alert('계좌번호가 복사되었습니다.');
         }).catch(() => {
             alert('복사에 실패했습니다.');
+        });
+    };
+
+    const openKakaoPay = (account) => {
+        // 계좌번호를 클립보드에 복사
+        navigator.clipboard.writeText(account).then(() => {
+            // 카카오페이 앱이 설치되어 있으면 앱 열기, 없으면 웹으로 이동
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            const isKakaoTalk = /KAKAOTALK/i.test(navigator.userAgent);
+            
+            if (isMobile) {
+                // 모바일: 카카오페이 앱 딥링크 시도
+                window.location.href = 'kakaotalk://kakaopay/money/send';
+                
+                // 앱이 없으면 웹으로 이동
+                setTimeout(() => {
+                    window.open('https://kakaopay.me', '_blank');
+                }, 500);
+            } else {
+                // 데스크톱: 카카오페이 웹으로 이동
+                window.open('https://kakaopay.me', '_blank');
+            }
+            
+            alert('계좌번호가 복사되었습니다. 카카오페이에서 송금해주세요.');
+        }).catch(() => {
+            alert('계좌번호 복사에 실패했습니다.');
         });
     };
 
@@ -106,6 +132,15 @@ const Account = () => {
                                     </svg>
                                 </button>
                             </div>
+                            <button
+                                className="kakaopay-btn"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    openKakaoPay(account.account);
+                                }}
+                            >
+                                <span>카카오페이로 보내기</span>
+                            </button>
                         </div>
                     )}
                 </div>
