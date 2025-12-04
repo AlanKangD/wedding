@@ -33,11 +33,11 @@ const Location = () => {
                         center: new window.kakao.maps.LatLng(latitude, longitude),
                         level: 3, // 지도 확대 레벨 (숫자가 클수록 멀리 보임)
                         
-                        // [수정] 지도 고정을 위한 옵션들
-                        draggable: false,             // 마우스 드래그, 모바일 터치로 지도 이동 막기
-                        zoomable: false,              // 마우스 휠, 핀치 줌으로 확대/축소 막기
-                        scrollwheel: false,           // 마우스 휠 막기 (중복 방어)
-                        disableDoubleClickZoom: true  // 더블 클릭 확대 막기
+                        // 지도 상호작용 활성화
+                        draggable: true,              // 마우스 드래그, 모바일 터치로 지도 이동 가능
+                        zoomable: true,               // 마우스 휠, 핀치 줌으로 확대/축소 가능
+                        scrollwheel: true,            // 마우스 휠로 확대/축소 가능
+                        disableDoubleClickZoom: false // 더블 클릭 확대 가능
                     };
 
                     const map = new window.kakao.maps.Map(container, options);
@@ -55,8 +55,8 @@ const Location = () => {
                     });
                     infowindow.open(map, marker);
                     
-                    // [추가] 혹시 모를 줌 컨트롤러가 있다면 제거
-                    map.setZoomable(false);
+                    // 줌 기능 활성화
+                    map.setZoomable(true);
                 });
             }
         };
