@@ -7,7 +7,7 @@ const Hero = () => {
     const weddingDate = '2026-04-05T13:30:00';
     
     // 메인 사진 경로 설정
-    const mainImage = '/main-photo.jpg'; // public 폴더의 이미지
+    const mainImage = '/main-photo.webp'; // public 폴더의 이미지
     const [imageLoaded, setImageLoaded] = useState(false);
     const [imageError, setImageError] = useState(false);
 
