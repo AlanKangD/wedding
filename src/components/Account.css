@@ -4,6 +4,26 @@
     text-align: center;
 }
 
+.account-main-title {
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--color-text);
+    margin-bottom: 0.8rem;
+    font-family: var(--font-serif);
+    letter-spacing: 0.02em;
+}
+
+.account-subtitle {
+    margin-bottom: 2.5rem;
+    color: var(--color-text-light);
+    line-height: 1.8;
+    max-width: 450px;
+    margin-left: auto;
+    margin-right: auto;
+    font-weight: 300;
+    font-size: 0.95rem;
+}
+
 .account-message {
     margin-bottom: 2.5rem;
     color: var(--color-text-light);
@@ -109,5 +129,154 @@
     font-size: 0.8rem;
     color: var(--color-text-lighter);
     font-weight: 300;
+}
+
+.account-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 0.6rem;
+    margin-bottom: 2rem;
+}
+
+.account-tab {
+    padding: 0.7rem 1.4rem;
+    background: none;
+    border: 1.5px solid var(--color-border);
+    border-radius: 24px;
+    font-size: 0.88rem;
+    color: var(--color-text-light);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-weight: 300;
+}
+
+.account-tab:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.account-tab.active {
+    background-color: var(--color-accent);
+    color: var(--color-white);
+    border-color: var(--color-accent);
+}
+
+.account-lists {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.account-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: var(--color-white);
+}
+
+.account-item {
+    border-bottom: 1px solid var(--color-border);
+}
+
+.account-item:last-child {
+    border-bottom: none;
+}
+
+.account-item-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.2rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+    text-align: left;
+}
+
+.account-item-header:hover {
+    background-color: var(--color-bg);
+}
+
+.account-item-name {
+    font-size: 0.95rem;
+    color: var(--color-text);
+    font-weight: 400;
+}
+
+.account-item-chevron {
+    font-size: 0.75rem;
+    color: var(--color-text-light);
+    transition: transform var(--transition-fast);
+    display: inline-block;
+}
+
+.account-item-chevron.expanded {
+    transform: rotate(180deg);
+}
+
+.account-item-content {
+    padding: 0 1.2rem 1rem 1.2rem;
+    background-color: var(--color-bg);
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        max-height: 200px;
+    }
+}
+
+.account-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem 0;
+}
+
+.account-bank-number {
+    font-size: 0.9rem;
+    color: var(--color-text);
+    font-weight: 400;
+    font-family: var(--font-serif);
+    letter-spacing: 0.02em;
+}
+
+.account-copy-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-light);
+    transition: all var(--transition-fast);
+    border-radius: 4px;
+    min-width: 32px;
+    min-height: 32px;
+}
+
+.account-copy-btn:hover {
+    color: var(--color-accent);
+    background-color: rgba(201, 169, 130, 0.1);
+}
+
+.account-copy-btn:active {
+    transform: scale(0.95);
+}
+
+.account-copy-btn svg {
+    width: 18px;
+    height: 18px;
+    display: block;
 }
 
