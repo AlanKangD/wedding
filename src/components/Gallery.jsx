@@ -19,7 +19,8 @@ const Gallery = () => {
     
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loadedImages, setLoadedImages] = useState(new Set());
-    const [preloadedImages, setPreloadedImages] = useState(new Set());
+    const [isInitialLoad, setIsInitialLoad] = useState(true);
+    const [showLoadingSpinner, setShowLoadingSpinner] = useState(false);
     
     // 스와이프 제스처를 위한 상태
     const [touchStart, setTouchStart] = useState(null);
@@ -29,28 +30,118 @@ const Gallery = () => {
     
     // 썸네일 스트립 ref
     const thumbnailStripRef = useRef(null);
+    const imageCacheRef = useRef(new Map());
 
-    // 현재 이미지와 다음 이미지 프리로딩
+    // 컴포넌트 마운트 시 모든 이미지 프리로드 (최적화)
     useEffect(() => {
-        // 현재 이미지 로드
-        if (!loadedImages.has(photos[currentIndex])) {
-            const img = new Image();
-            img.src = photos[currentIndex];
+        const preloadImages = async () => {
+            // 첫 번째 이미지가 이미 로드되었는지 빠르게 확인
+            const firstImg = new Image();
+            firstImg.src = photos[0];
+            
+            // 이미지가 캐시에 있으면 즉시 로드됨
+            if (firstImg.complete) {
+                setLoadedImages(prev => new Set([...prev, photos[0]]));
+                imageCacheRef.current.set(photos[0], true);
+            } else {
+                // 로딩 스피너 표시 (200ms 후에만 표시하여 깜빡임 방지)
+                const spinnerTimeout = setTimeout(() => {
+                    setShowLoadingSpinner(true);
+                }, 200);
+                
+                firstImg.onload = () => {
+                    clearTimeout(spinnerTimeout);
+                    setShowLoadingSpinner(false);
+                    setLoadedImages(prev => new Set([...prev, photos[0]]));
+                    imageCacheRef.current.set(photos[0], true);
+                };
+            }
+
+            // 나머지 이미지들 백그라운드에서 프리로드
+            const loadPromises = photos.slice(1).map((photo, index) => {
+                return new Promise((resolve) => {
+                    // 이미 캐시에 있는지 확인
+                    if (imageCacheRef.current.has(photo)) {
+                        setLoadedImages(prev => new Set([...prev, photo]));
+                        resolve();
+                        return;
+                    }
+
+                    const img = new Image();
+                    img.onload = () => {
+                        imageCacheRef.current.set(photo, true);
+                        setLoadedImages(prev => new Set([...prev, photo]));
+                        resolve();
+                    };
+                    
+                    img.onerror = () => {
+                        console.warn(`이미지 로드 실패: ${photo}`);
+                        resolve();
+                    };
+                    
+                    img.src = photo;
+                });
+            });
+
+            await Promise.all(loadPromises);
+            setIsInitialLoad(false);
+            setShowLoadingSpinner(false);
+        };
+
+        preloadImages();
+    }, []); // 빈 의존성 배열로 마운트 시 한 번만 실행
+
+    // 현재 이미지와 인접 이미지 우선 프리로드
+    useEffect(() => {
+        if (isInitialLoad) return; // 초기 로드 중이면 스킵
+
+        // 현재 이미지가 이미 로드되어 있으면 스피너 표시 안 함
+        if (loadedImages.has(photos[currentIndex])) {
+            setShowLoadingSpinner(false);
+            return;
+        }
+
+        // 현재 이미지 로드 (이미 캐시에 있으면 즉시 완료)
+        const img = new Image();
+        img.src = photos[currentIndex];
+        
+        // 이미지가 캐시에 있으면 즉시 로드됨
+        if (img.complete) {
+            setLoadedImages(prev => new Set([...prev, photos[currentIndex]]));
+            setShowLoadingSpinner(false);
+        } else {
+            // 로딩 스피너 표시 (200ms 후에만 표시)
+            const spinnerTimeout = setTimeout(() => {
+                setShowLoadingSpinner(true);
+            }, 200);
+            
             img.onload = () => {
+                clearTimeout(spinnerTimeout);
+                setShowLoadingSpinner(false);
                 setLoadedImages(prev => new Set([...prev, photos[currentIndex]]));
             };
         }
 
-        // 다음 이미지 프리로딩
+        // 다음 이미지 프리로드
         const nextIndex = (currentIndex + 1) % photos.length;
-        if (!preloadedImages.has(photos[nextIndex])) {
-            const img = new Image();
-            img.src = photos[nextIndex];
-            img.onload = () => {
-                setPreloadedImages(prev => new Set([...prev, photos[nextIndex]]));
+        if (!loadedImages.has(photos[nextIndex])) {
+            const nextImg = new Image();
+            nextImg.src = photos[nextIndex];
+            nextImg.onload = () => {
+                setLoadedImages(prev => new Set([...prev, photos[nextIndex]]));
             };
         }
-    }, [currentIndex, photos, loadedImages, preloadedImages]);
+
+        // 이전 이미지 프리로드
+        const prevIndex = (currentIndex - 1 + photos.length) % photos.length;
+        if (!loadedImages.has(photos[prevIndex])) {
+            const prevImg = new Image();
+            prevImg.src = photos[prevIndex];
+            prevImg.onload = () => {
+                setLoadedImages(prev => new Set([...prev, photos[prevIndex]]));
+            };
+        }
+    }, [currentIndex, photos, loadedImages, isInitialLoad]);
 
     // 썸네일 스트립 자동 스크롤 (선택된 썸네일이 중앙에 오도록)
     useEffect(() => {
@@ -171,7 +262,7 @@ const Gallery = () => {
                             }}
                             onWheel={onWheel}
                         >
-                            {!loadedImages.has(photos[currentIndex]) && (
+                            {!loadedImages.has(photos[currentIndex]) && showLoadingSpinner && (
                                 <div className="image-loading-placeholder">
                                     <div className="image-loading-spinner"></div>
                                 </div>
@@ -180,9 +271,14 @@ const Gallery = () => {
                                 src={photos[currentIndex]}
                                 alt={`갤러리 사진 ${currentIndex + 1}`}
                                 className={`main-image ${loadedImages.has(photos[currentIndex]) ? 'loaded' : 'loading'} ${isDragging ? 'dragging' : ''}`}
-                                loading="lazy"
+                                loading={currentIndex === 0 ? "eager" : "lazy"}
                                 decoding="async"
                                 draggable="false"
+                                fetchPriority={currentIndex === 0 ? "high" : "auto"}
+                                style={{
+                                    opacity: loadedImages.has(photos[currentIndex]) ? 1 : 0,
+                                    transition: 'opacity 0.2s ease-in-out'
+                                }}
                             />
 
                             <button className="nav-btn prev" onClick={prevSlide}>
@@ -207,9 +303,10 @@ const Gallery = () => {
                                         src={photo}
                                         alt={`썸네일 ${index + 1}`}
                                         className="thumbnail-image"
-                                        loading="lazy"
+                                        loading={index < 6 ? "eager" : "lazy"}
                                         decoding="async"
                                         draggable="false"
+                                        fetchPriority={index < 3 ? "high" : "auto"}
                                     />
                                 </div>
                             ))}

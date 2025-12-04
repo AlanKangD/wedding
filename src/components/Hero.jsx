@@ -10,6 +10,7 @@ const Hero = () => {
     const mainImage = '/main-photo.webp'; // public 폴더의 이미지
     const [imageLoaded, setImageLoaded] = useState(false);
     const [imageError, setImageError] = useState(false);
+    const [showLoadingSpinner, setShowLoadingSpinner] = useState(false);
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -22,13 +23,35 @@ const Hero = () => {
 
     const { month, day, weekday } = formatDate(weddingDate);
 
-    // 이미지 프리로딩
+    // 이미지 프리로딩 (최적화)
     useEffect(() => {
-        if (mainImage) {
-            const img = new Image();
-            img.src = mainImage;
-            img.onload = () => setImageLoaded(true);
-            img.onerror = () => setImageError(true);
+        if (!mainImage) return;
+
+        const img = new Image();
+        img.fetchPriority = 'high';
+        img.src = mainImage;
+        
+        // 이미지가 이미 브라우저 캐시에 있으면 즉시 로드됨
+        if (img.complete) {
+            setImageLoaded(true);
+            setShowLoadingSpinner(false);
+        } else {
+            // 로딩 스피너 표시 (200ms 후에만 표시하여 빠른 로드 시 깜빡임 방지)
+            const spinnerTimeout = setTimeout(() => {
+                setShowLoadingSpinner(true);
+            }, 200);
+            
+            img.onload = () => {
+                clearTimeout(spinnerTimeout);
+                setShowLoadingSpinner(false);
+                setImageLoaded(true);
+            };
+            
+            img.onerror = () => {
+                clearTimeout(spinnerTimeout);
+                setShowLoadingSpinner(false);
+                setImageError(true);
+            };
         }
     }, [mainImage]);
 
@@ -47,7 +70,7 @@ const Hero = () => {
             <div className="hero-image-container">
                 {mainImage ? (
                     <>
-                        {!imageLoaded && !imageError && (
+                        {!imageLoaded && !imageError && showLoadingSpinner && (
                             <div className="hero-image-placeholder">
                                 <div className="image-loading-spinner"></div>
                             </div>
@@ -58,6 +81,11 @@ const Hero = () => {
                             className={`hero-image ${imageLoaded ? 'loaded' : 'loading'}`}
                             loading="eager"
                             decoding="async"
+                            fetchPriority="high"
+                            style={{
+                                opacity: imageLoaded ? 1 : 0,
+                                transition: 'opacity 0.2s ease-in-out'
+                            }}
                         />
                     </>
                 ) : (
