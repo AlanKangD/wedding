@@ -18,6 +18,13 @@
     overflow: hidden;
     border-radius: 8px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    touch-action: pan-y pinch-zoom;
+    cursor: grab;
+    user-select: none;
+}
+
+.main-image-container:active {
+    cursor: grabbing;
 }
 
 .main-image {
@@ -29,7 +36,14 @@
     object-fit: cover;
     display: block;
     transition: transform var(--transition-normal), opacity var(--transition-normal);
-    cursor: pointer;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.main-image.dragging {
+    cursor: grabbing;
+    transition: none;
 }
 
 .main-image.loading {
@@ -119,9 +133,28 @@
     display: flex;
     gap: 0.8rem;
     overflow-x: auto;
+    overflow-y: hidden;
     padding: 0.5rem 0 1rem;
-    justify-content: center;
     scrollbar-width: thin;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+.thumbnail-strip::-webkit-scrollbar {
+    height: 4px;
+}
+
+.thumbnail-strip::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.thumbnail-strip::-webkit-scrollbar-thumb {
+    background: var(--color-accent-light);
+    border-radius: 2px;
+}
+
+.thumbnail-strip::-webkit-scrollbar-thumb:hover {
+    background: var(--color-accent);
 }
 
 .thumbnail {

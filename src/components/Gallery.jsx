@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import './Gallery.css';
 
 const Gallery = () => {
@@ -20,6 +20,15 @@ const Gallery = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loadedImages, setLoadedImages] = useState(new Set());
     const [preloadedImages, setPreloadedImages] = useState(new Set());
+    
+    // 스와이프 제스처를 위한 상태
+    const [touchStart, setTouchStart] = useState(null);
+    const [touchEnd, setTouchEnd] = useState(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragStart, setDragStart] = useState(null);
+    
+    // 썸네일 스트립 ref
+    const thumbnailStripRef = useRef(null);
 
     // 현재 이미지와 다음 이미지 프리로딩
     useEffect(() => {
@@ -43,12 +52,102 @@ const Gallery = () => {
         }
     }, [currentIndex, photos, loadedImages, preloadedImages]);
 
+    // 썸네일 스트립 자동 스크롤 (선택된 썸네일이 중앙에 오도록)
+    useEffect(() => {
+        if (thumbnailStripRef.current) {
+            const thumbnail = thumbnailStripRef.current.children[currentIndex];
+            if (thumbnail) {
+                const strip = thumbnailStripRef.current;
+                const thumbnailWidth = thumbnail.offsetWidth;
+                const thumbnailGap = 12.8; // 0.8rem = 12.8px (기본 폰트 크기 기준)
+                const stripWidth = strip.offsetWidth;
+                const thumbnailLeft = thumbnail.offsetLeft;
+                const thumbnailCenter = thumbnailLeft + thumbnailWidth / 2;
+                const scrollPosition = thumbnailCenter - stripWidth / 2;
+                
+                strip.scrollTo({
+                    left: scrollPosition,
+                    behavior: 'smooth'
+                });
+            }
+        }
+    }, [currentIndex]);
+
     const nextSlide = () => {
         setCurrentIndex((prev) => (prev + 1) % photos.length);
     };
 
     const prevSlide = () => {
         setCurrentIndex((prev) => (prev - 1 + photos.length) % photos.length);
+    };
+
+    // 터치 이벤트 핸들러
+    const minSwipeDistance = 50;
+
+    const onTouchStart = (e) => {
+        setTouchEnd(null);
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const onTouchMove = (e) => {
+        setTouchEnd(e.targetTouches[0].clientX);
+    };
+
+    const onTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+        
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > minSwipeDistance;
+        const isRightSwipe = distance < -minSwipeDistance;
+        
+        if (isLeftSwipe) {
+            nextSlide();
+        }
+        if (isRightSwipe) {
+            prevSlide();
+        }
+    };
+
+    // 마우스 드래그 이벤트 핸들러
+    const onMouseDown = (e) => {
+        setIsDragging(true);
+        setDragStart(e.clientX);
+    };
+
+    const onMouseMove = (e) => {
+        if (!isDragging || !dragStart) return;
+        // 드래그 중에는 기본 동작 방지하지 않음 (이미지 확대 등)
+    };
+
+    const onMouseUp = (e) => {
+        if (!isDragging || !dragStart) return;
+        
+        const distance = dragStart - e.clientX;
+        const isLeftSwipe = distance > minSwipeDistance;
+        const isRightSwipe = distance < -minSwipeDistance;
+        
+        if (isLeftSwipe) {
+            nextSlide();
+        }
+        if (isRightSwipe) {
+            prevSlide();
+        }
+        
+        setIsDragging(false);
+        setDragStart(null);
+    };
+
+    // 휠 이벤트 핸들러 (수평 스크롤)
+    const onWheel = (e) => {
+        // 수평 스크롤 감지
+        if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+            e.preventDefault();
+            if (e.deltaX > 0) {
+                nextSlide();
+            } else {
+                prevSlide();
+            }
+        }
     };
 
     return (
@@ -58,7 +157,20 @@ const Gallery = () => {
 
                 {photos.length > 0 ? (
                     <div className="gallery-slider">
-                        <div className="main-image-container">
+                        <div 
+                            className="main-image-container"
+                            onTouchStart={onTouchStart}
+                            onTouchMove={onTouchMove}
+                            onTouchEnd={onTouchEnd}
+                            onMouseDown={onMouseDown}
+                            onMouseMove={onMouseMove}
+                            onMouseUp={onMouseUp}
+                            onMouseLeave={() => {
+                                setIsDragging(false);
+                                setDragStart(null);
+                            }}
+                            onWheel={onWheel}
+                        >
                             {!loadedImages.has(photos[currentIndex]) && (
                                 <div className="image-loading-placeholder">
                                     <div className="image-loading-spinner"></div>
@@ -67,9 +179,10 @@ const Gallery = () => {
                             <img
                                 src={photos[currentIndex]}
                                 alt={`갤러리 사진 ${currentIndex + 1}`}
-                                className={`main-image ${loadedImages.has(photos[currentIndex]) ? 'loaded' : 'loading'}`}
+                                className={`main-image ${loadedImages.has(photos[currentIndex]) ? 'loaded' : 'loading'} ${isDragging ? 'dragging' : ''}`}
                                 loading="lazy"
                                 decoding="async"
+                                draggable="false"
                             />
 
                             <button className="nav-btn prev" onClick={prevSlide}>
@@ -80,7 +193,10 @@ const Gallery = () => {
                             </button>
                         </div>
 
-                        <div className="thumbnail-strip">
+                        <div 
+                            className="thumbnail-strip"
+                            ref={thumbnailStripRef}
+                        >
                             {photos.map((photo, index) => (
                                 <div
                                     key={index}
@@ -93,6 +209,7 @@ const Gallery = () => {
                                         className="thumbnail-image"
                                         loading="lazy"
                                         decoding="async"
+                                        draggable="false"
                                     />
                                 </div>
                             ))}
