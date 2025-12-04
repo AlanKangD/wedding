@@ -72,10 +72,6 @@ const Account = () => {
                         계좌번호 복사
                     </button>
                 </div>
-
-                <p className="account-note">
-                    * 계좌번호가 복사되었습니다.
-                </p>
             </div>
         </section>
     );
