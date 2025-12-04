@@ -70,6 +70,46 @@ const Account = () => {
         }
     };
 
+    // 은행명을 은행 코드로 변환하는 매핑
+    const bankCodeMap = {
+        '농협': '011',
+        'NH농협': '011',
+        '국민은행': '004',
+        'KB국민은행': '004',
+        '신한은행': '088',
+        '우리은행': '020',
+        '하나은행': '081',
+        'KEB하나은행': '081',
+        'SC제일은행': '023',
+        '한국씨티은행': '027',
+        '대구은행': '031',
+        '부산은행': '032',
+        '광주은행': '034',
+        '제주은행': '035',
+        '전북은행': '037',
+        '경남은행': '039',
+        '새마을금고': '045',
+        '신협': '048',
+        '상호저축은행': '050',
+        '카카오뱅크': '090',
+        '토스뱅크': '092',
+        'K뱅크': '089',
+        'IBK기업은행': '003',
+        '기업은행': '003',
+        '수협은행': '007',
+        '수협': '007',
+    };
+
+    // 계좌번호에서 하이픈 제거
+    const formatAccountNumber = (account) => {
+        return account.replace(/-/g, '');
+    };
+
+    // 은행명을 은행 코드로 변환
+    const getBankCode = (bankName) => {
+        return bankCodeMap[bankName] || '';
+    };
+
     const copyToClipboard = (text) => {
         navigator.clipboard.writeText(text).then(() => {
             alert('계좌번호가 복사되었습니다.');
@@ -78,21 +118,32 @@ const Account = () => {
         });
     };
 
-    const openKakaoPay = (account) => {
+    const openKakaoPay = (accountInfo) => {
+        const { bank, account, holder } = accountInfo;
+        
         // 계좌번호를 클립보드에 복사
         navigator.clipboard.writeText(account).then(() => {
-            // 카카오페이 앱이 설치되어 있으면 앱 열기, 없으면 웹으로 이동
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            const isKakaoTalk = /KAKAOTALK/i.test(navigator.userAgent);
+            const bankCode = getBankCode(bank);
+            const formattedAccount = formatAccountNumber(account);
+            const encodedName = encodeURIComponent(holder);
             
             if (isMobile) {
-                // 모바일: 카카오페이 앱 딥링크 시도
-                window.location.href = 'kakaotalk://kakaopay/money/send';
+                // 모바일: 카카오페이 앱 딥링크 시도 (계좌 정보 포함)
+                let deepLink = 'kakaotalk://kakaopay/money/send';
                 
-                // 앱이 없으면 웹으로 이동
+                // 계좌 정보가 있으면 딥링크에 파라미터 추가
+                if (bankCode && formattedAccount) {
+                    deepLink = `kakaotalk://kakaopay/money/send?bank=${bankCode}&account=${formattedAccount}&name=${encodedName}`;
+                }
+                
+                // 딥링크 시도
+                window.location.href = deepLink;
+                
+                // 앱이 없거나 딥링크가 작동하지 않으면 웹으로 이동
                 setTimeout(() => {
                     window.open('https://kakaopay.me', '_blank');
-                }, 500);
+                }, 1000);
             } else {
                 // 데스크톱: 카카오페이 웹으로 이동
                 window.open('https://kakaopay.me', '_blank');
@@ -146,7 +197,7 @@ const Account = () => {
                                 className="kakaopay-btn"
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    openKakaoPay(account.account);
+                                    openKakaoPay(account);
                                 }}
                             >
                                 <span>카카오페이로 보내기</span>
