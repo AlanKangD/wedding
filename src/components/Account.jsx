@@ -13,13 +13,13 @@ const Account = () => {
         {
             name: '강문봉',
             bank: '농협',
-            account: '178408-51-002856',
+            account: '901088-52-057004',
             holder: '강문봉'
         },
         {
             name: '김미영',
             bank: '농협',
-            account: '178408-51-002856',
+            account: '351-0825-9359-33',
             holder: '김미영'
         }
     ];
@@ -111,11 +111,42 @@ const Account = () => {
     };
 
     const copyToClipboard = (text) => {
-        navigator.clipboard.writeText(text).then(() => {
-            alert('계좌번호가 복사되었습니다.');
-        }).catch(() => {
+        // 모던 브라우저의 Clipboard API 사용
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('계좌번호가 복사되었습니다.');
+            }).catch(() => {
+                // Clipboard API 실패 시 fallback 방법 사용
+                fallbackCopyToClipboard(text);
+            });
+        } else {
+            // Clipboard API를 지원하지 않는 브라우저의 경우 fallback 사용
+            fallbackCopyToClipboard(text);
+        }
+    };
+
+    const fallbackCopyToClipboard = (text) => {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+            const successful = document.execCommand('copy');
+            if (successful) {
+                alert('계좌번호가 복사되었습니다.');
+            } else {
+                alert('복사에 실패했습니다.');
+            }
+        } catch (err) {
             alert('복사에 실패했습니다.');
-        });
+        } finally {
+            document.body.removeChild(textArea);
+        }
     };
 
     const openKakaoPay = (accountInfo) => {
@@ -230,15 +261,10 @@ const Account = () => {
                                 onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
-                                    console.log('버튼 클릭 이벤트 발생', account);
-                                    openKakaoPay(account);
-                                }}
-                                onTouchStart={(e) => {
-                                    e.stopPropagation();
-                                    console.log('터치 이벤트 발생');
+                                    copyToClipboard(account.account);
                                 }}
                             >
-                                <span>카카오페이로 보내기</span>
+                                <span>계좌번호 복사하기</span>
                             </button>
                         </div>
                     )}
