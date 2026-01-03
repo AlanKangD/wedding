@@ -29,19 +29,19 @@ const Account = () => {
         {
             name: '오다영',
             bank: '농협',
-            account: '178408-51-002856',
+            account: '302-6471-5422-71',
             holder: '오다영'
         },
         {
             name: '오명훈',
             bank: '농협',
-            account: '178408-51-002856',
+            account: '302-6471-5422-71',
             holder: '오명훈'
         },
         {
             name: '김연숙',
             bank: '농협',
-            account: '178408-51-002856',
+            account: '961-12-198561',
             holder: '김연숙'
         }
     ];
