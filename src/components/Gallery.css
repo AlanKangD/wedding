@@ -35,7 +35,7 @@
     height: 100%;
     object-fit: cover;
     display: block;
-    transition: transform var(--transition-normal), opacity var(--transition-normal);
+    transition: transform 0.15s ease, opacity 0.1s ease-out;
     cursor: grab;
     user-select: none;
     -webkit-user-drag: none;
@@ -52,7 +52,7 @@
 
 .main-image.loaded {
     opacity: 1;
-    transition: opacity 0.2s ease-in-out;
+    transition: opacity 0.1s ease-out;
 }
 
 .image-loading-placeholder {
@@ -102,39 +102,6 @@
 
 .main-image:hover {
     transform: scale(1.02);
-}
-
-.nav-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(255, 255, 255, 0.9);
-    border: none;
-    color: var(--color-text);
-    font-size: 1.5rem;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    z-index: 10;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.nav-btn:hover {
-    background: var(--color-white);
-    transform: translateY(-50%) scale(1.1);
-}
-
-.nav-btn.prev {
-    left: 1rem;
-}
-
-.nav-btn.next {
-    right: 1rem;
 }
 
 .thumbnail-strip {

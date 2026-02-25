@@ -276,16 +276,9 @@ const Gallery = () => {
                                 fetchPriority={currentIndex === 0 ? "high" : "auto"}
                                 style={{
                                     opacity: loadedImages.has(photos[currentIndex]) ? 1 : 0,
-                                    transition: 'opacity 0.2s ease-in-out'
+                                    transition: 'opacity 0.1s ease-out'
                                 }}
                             />
-
-                            <button className="nav-btn prev" onClick={prevSlide}>
-                                &lt;
-                            </button>
-                            <button className="nav-btn next" onClick={nextSlide}>
-                                &gt;
-                            </button>
                         </div>
 
                         <div 
