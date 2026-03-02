@@ -1,54 +1,63 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import './Gallery.css';
 
 const Gallery = () => {
-    // 갤러리 이미지 경로 배열
     const photos = [
         '/gallery-1.webp',
         '/gallery-2.webp',
         '/gallery-3.webp',
         '/gallery-4.webp',
         '/gallery-5.webp',
+        '/main-photo.webp',
         '/gallery-6.webp',
         '/gallery-7.webp',
         '/gallery-8.webp',
         '/gallery-9.webp',
         '/gallery-10.webp',
-
     ];
-    
+
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loadedImages, setLoadedImages] = useState(new Set());
     const [isInitialLoad, setIsInitialLoad] = useState(true);
     const [showLoadingSpinner, setShowLoadingSpinner] = useState(false);
-    
-    // 스와이프 제스처를 위한 상태
-    const [touchStart, setTouchStart] = useState(null);
-    const [touchEnd, setTouchEnd] = useState(null);
-    const [isDragging, setIsDragging] = useState(false);
-    const [dragStart, setDragStart] = useState(null);
-    
-    // 썸네일 스트립 ref
+
+    const containerRef = useRef(null);
+    const trackRef = useRef(null);
     const thumbnailStripRef = useRef(null);
     const imageCacheRef = useRef(new Map());
 
-    // 컴포넌트 마운트 시 모든 이미지 프리로드 (최적화)
+    const touchStartXRef = useRef(null);
+    const touchStartYRef = useRef(null);
+    const touchStartTimeRef = useRef(null);
+    const dragOffsetRef = useRef(0);
+    const isDraggingRef = useRef(false);
+    const isTransitioningRef = useRef(false);
+    const isHorizontalRef = useRef(null);
+    const lastWheelRef = useRef(0);
+
+    const prevIndex = (currentIndex - 1 + photos.length) % photos.length;
+    const nextIndex = (currentIndex + 1) % photos.length;
+
+    useLayoutEffect(() => {
+        if (trackRef.current) {
+            trackRef.current.style.transition = 'none';
+            trackRef.current.style.transform = 'translateX(-33.333%)';
+        }
+    }, [currentIndex]);
+
     useEffect(() => {
         const preloadImages = async () => {
-            // 첫 번째 이미지가 이미 로드되었는지 빠르게 확인
             const firstImg = new Image();
             firstImg.src = photos[0];
-            
-            // 이미지가 캐시에 있으면 즉시 로드됨
+
             if (firstImg.complete) {
                 setLoadedImages(prev => new Set([...prev, photos[0]]));
                 imageCacheRef.current.set(photos[0], true);
             } else {
-                // 로딩 스피너 표시 (200ms 후에만 표시하여 깜빡임 방지)
                 const spinnerTimeout = setTimeout(() => {
                     setShowLoadingSpinner(true);
                 }, 200);
-                
+
                 firstImg.onload = () => {
                     clearTimeout(spinnerTimeout);
                     setShowLoadingSpinner(false);
@@ -57,10 +66,8 @@ const Gallery = () => {
                 };
             }
 
-            // 나머지 이미지들 백그라운드에서 프리로드
-            const loadPromises = photos.slice(1).map((photo, index) => {
+            const loadPromises = photos.slice(1).map((photo) => {
                 return new Promise((resolve) => {
-                    // 이미 캐시에 있는지 확인
                     if (imageCacheRef.current.has(photo)) {
                         setLoadedImages(prev => new Set([...prev, photo]));
                         resolve();
@@ -73,11 +80,7 @@ const Gallery = () => {
                         setLoadedImages(prev => new Set([...prev, photo]));
                         resolve();
                     };
-                    
-                    img.onerror = () => {
-                        resolve();
-                    };
-                    
+                    img.onerror = () => resolve();
                     img.src = photo;
                 });
             });
@@ -88,32 +91,23 @@ const Gallery = () => {
         };
 
         preloadImages();
-    }, []); // 빈 의존성 배열로 마운트 시 한 번만 실행
+    }, []);
 
-    // 현재 이미지와 인접 이미지 우선 프리로드
     useEffect(() => {
-        if (isInitialLoad) return; // 초기 로드 중이면 스킵
-
-        // 현재 이미지가 이미 로드되어 있으면 스피너 표시 안 함
+        if (isInitialLoad) return;
         if (loadedImages.has(photos[currentIndex])) {
             setShowLoadingSpinner(false);
             return;
         }
 
-        // 현재 이미지 로드 (이미 캐시에 있으면 즉시 완료)
         const img = new Image();
         img.src = photos[currentIndex];
-        
-        // 이미지가 캐시에 있으면 즉시 로드됨
+
         if (img.complete) {
             setLoadedImages(prev => new Set([...prev, photos[currentIndex]]));
             setShowLoadingSpinner(false);
         } else {
-            // 로딩 스피너 표시 (200ms 후에만 표시)
-            const spinnerTimeout = setTimeout(() => {
-                setShowLoadingSpinner(true);
-            }, 200);
-            
+            const spinnerTimeout = setTimeout(() => setShowLoadingSpinner(true), 200);
             img.onload = () => {
                 clearTimeout(spinnerTimeout);
                 setShowLoadingSpinner(false);
@@ -121,124 +115,195 @@ const Gallery = () => {
             };
         }
 
-        // 다음 이미지 프리로드
-        const nextIndex = (currentIndex + 1) % photos.length;
-        if (!loadedImages.has(photos[nextIndex])) {
-            const nextImg = new Image();
-            nextImg.src = photos[nextIndex];
-            nextImg.onload = () => {
-                setLoadedImages(prev => new Set([...prev, photos[nextIndex]]));
-            };
-        }
+        [nextIndex, prevIndex].forEach(idx => {
+            if (!loadedImages.has(photos[idx])) {
+                const preImg = new Image();
+                preImg.src = photos[idx];
+                preImg.onload = () => {
+                    setLoadedImages(prev => new Set([...prev, photos[idx]]));
+                };
+            }
+        });
+    }, [currentIndex, photos, loadedImages, isInitialLoad, nextIndex, prevIndex]);
 
-        // 이전 이미지 프리로드
-        const prevIndex = (currentIndex - 1 + photos.length) % photos.length;
-        if (!loadedImages.has(photos[prevIndex])) {
-            const prevImg = new Image();
-            prevImg.src = photos[prevIndex];
-            prevImg.onload = () => {
-                setLoadedImages(prev => new Set([...prev, photos[prevIndex]]));
-            };
-        }
-    }, [currentIndex, photos, loadedImages, isInitialLoad]);
-
-    // 썸네일 스트립 자동 스크롤 (선택된 썸네일이 중앙에 오도록)
     useEffect(() => {
         if (thumbnailStripRef.current) {
             const thumbnail = thumbnailStripRef.current.children[currentIndex];
             if (thumbnail) {
                 const strip = thumbnailStripRef.current;
-                const thumbnailWidth = thumbnail.offsetWidth;
-                const thumbnailGap = 12.8; // 0.8rem = 12.8px (기본 폰트 크기 기준)
-                const stripWidth = strip.offsetWidth;
-                const thumbnailLeft = thumbnail.offsetLeft;
-                const thumbnailCenter = thumbnailLeft + thumbnailWidth / 2;
-                const scrollPosition = thumbnailCenter - stripWidth / 2;
-                
+                const thumbnailCenter = thumbnail.offsetLeft + thumbnail.offsetWidth / 2;
                 strip.scrollTo({
-                    left: scrollPosition,
+                    left: thumbnailCenter - strip.offsetWidth / 2,
                     behavior: 'smooth'
                 });
             }
         }
     }, [currentIndex]);
 
-    const nextSlide = () => {
-        setCurrentIndex((prev) => (prev + 1) % photos.length);
-    };
+    const goToNext = useCallback(() => {
+        if (isTransitioningRef.current) return;
+        isTransitioningRef.current = true;
 
-    const prevSlide = () => {
-        setCurrentIndex((prev) => (prev - 1 + photos.length) % photos.length);
-    };
-
-    // 터치 이벤트 핸들러
-    const minSwipeDistance = 50;
-
-    const onTouchStart = (e) => {
-        setTouchEnd(null);
-        setTouchStart(e.targetTouches[0].clientX);
-    };
-
-    const onTouchMove = (e) => {
-        setTouchEnd(e.targetTouches[0].clientX);
-    };
-
-    const onTouchEnd = () => {
-        if (!touchStart || !touchEnd) return;
-        
-        const distance = touchStart - touchEnd;
-        const isLeftSwipe = distance > minSwipeDistance;
-        const isRightSwipe = distance < -minSwipeDistance;
-        
-        if (isLeftSwipe) {
-            nextSlide();
+        if (trackRef.current) {
+            trackRef.current.style.transition = 'transform 0.28s cubic-bezier(0.22, 0.61, 0.36, 1)';
+            trackRef.current.style.transform = 'translateX(-66.666%)';
         }
-        if (isRightSwipe) {
-            prevSlide();
+
+        const finish = () => {
+            isTransitioningRef.current = false;
+            setCurrentIndex(prev => (prev + 1) % photos.length);
+        };
+
+        const handler = () => {
+            trackRef.current?.removeEventListener('transitionend', handler);
+            finish();
+        };
+        trackRef.current?.addEventListener('transitionend', handler);
+        setTimeout(() => { if (isTransitioningRef.current) finish(); }, 350);
+    }, [photos.length]);
+
+    const goToPrev = useCallback(() => {
+        if (isTransitioningRef.current) return;
+        isTransitioningRef.current = true;
+
+        if (trackRef.current) {
+            trackRef.current.style.transition = 'transform 0.28s cubic-bezier(0.22, 0.61, 0.36, 1)';
+            trackRef.current.style.transform = 'translateX(0%)';
         }
-    };
 
-    // 마우스 드래그 이벤트 핸들러
-    const onMouseDown = (e) => {
-        setIsDragging(true);
-        setDragStart(e.clientX);
-    };
+        const finish = () => {
+            isTransitioningRef.current = false;
+            setCurrentIndex(prev => (prev - 1 + photos.length) % photos.length);
+        };
 
-    const onMouseMove = (e) => {
-        if (!isDragging || !dragStart) return;
-        // 드래그 중에는 기본 동작 방지하지 않음 (이미지 확대 등)
-    };
+        const handler = () => {
+            trackRef.current?.removeEventListener('transitionend', handler);
+            finish();
+        };
+        trackRef.current?.addEventListener('transitionend', handler);
+        setTimeout(() => { if (isTransitioningRef.current) finish(); }, 350);
+    }, [photos.length]);
 
-    const onMouseUp = (e) => {
-        if (!isDragging || !dragStart) return;
-        
-        const distance = dragStart - e.clientX;
-        const isLeftSwipe = distance > minSwipeDistance;
-        const isRightSwipe = distance < -minSwipeDistance;
-        
-        if (isLeftSwipe) {
-            nextSlide();
+    const snapBack = useCallback(() => {
+        if (trackRef.current) {
+            trackRef.current.style.transition = 'transform 0.2s cubic-bezier(0.22, 0.61, 0.36, 1)';
+            trackRef.current.style.transform = 'translateX(-33.333%)';
         }
-        if (isRightSwipe) {
-            prevSlide();
-        }
-        
-        setIsDragging(false);
-        setDragStart(null);
-    };
+    }, []);
 
-    // 휠 이벤트 핸들러 (수평 스크롤)
-    const onWheel = (e) => {
-        // 수평 스크롤 감지
-        if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-            e.preventDefault();
-            if (e.deltaX > 0) {
-                nextSlide();
-            } else {
-                prevSlide();
+    const resolveDrag = useCallback(() => {
+        isDraggingRef.current = false;
+        const offset = dragOffsetRef.current;
+        const elapsed = Date.now() - (touchStartTimeRef.current || Date.now());
+        const velocity = Math.abs(offset) / Math.max(elapsed, 1);
+
+        if (Math.abs(offset) > 40 || (velocity > 0.25 && Math.abs(offset) > 15)) {
+            if (offset < 0) goToNext();
+            else goToPrev();
+        } else {
+            snapBack();
+        }
+
+        touchStartXRef.current = null;
+        touchStartYRef.current = null;
+        dragOffsetRef.current = 0;
+        isHorizontalRef.current = null;
+    }, [goToNext, goToPrev, snapBack]);
+
+    const onTouchStart = useCallback((e) => {
+        if (isTransitioningRef.current) return;
+        touchStartXRef.current = e.targetTouches[0].clientX;
+        touchStartYRef.current = e.targetTouches[0].clientY;
+        touchStartTimeRef.current = Date.now();
+        dragOffsetRef.current = 0;
+        isDraggingRef.current = true;
+        isHorizontalRef.current = null;
+
+        if (trackRef.current) {
+            trackRef.current.style.transition = 'none';
+        }
+    }, []);
+
+    const onTouchMove = useCallback((e) => {
+        if (!isDraggingRef.current || touchStartXRef.current === null) return;
+
+        const dx = e.targetTouches[0].clientX - touchStartXRef.current;
+        const dy = e.targetTouches[0].clientY - (touchStartYRef.current || 0);
+
+        if (isHorizontalRef.current === null && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) {
+            isHorizontalRef.current = Math.abs(dx) > Math.abs(dy);
+        }
+
+        if (!isHorizontalRef.current) return;
+
+        dragOffsetRef.current = dx;
+        if (trackRef.current) {
+            trackRef.current.style.transform = `translateX(calc(-33.333% + ${dx}px))`;
+        }
+    }, []);
+
+    const onTouchEnd = useCallback(() => {
+        if (!isDraggingRef.current) return;
+        resolveDrag();
+    }, [resolveDrag]);
+
+    const onMouseDown = useCallback((e) => {
+        if (isTransitioningRef.current) return;
+        e.preventDefault();
+        touchStartXRef.current = e.clientX;
+        touchStartTimeRef.current = Date.now();
+        dragOffsetRef.current = 0;
+        isDraggingRef.current = true;
+
+        if (trackRef.current) {
+            trackRef.current.style.transition = 'none';
+        }
+    }, []);
+
+    const onMouseMove = useCallback((e) => {
+        if (!isDraggingRef.current || touchStartXRef.current === null) return;
+        const dx = e.clientX - touchStartXRef.current;
+        dragOffsetRef.current = dx;
+        if (trackRef.current) {
+            trackRef.current.style.transform = `translateX(calc(-33.333% + ${dx}px))`;
+        }
+    }, []);
+
+    const onMouseUp = useCallback(() => {
+        if (!isDraggingRef.current) return;
+        resolveDrag();
+    }, [resolveDrag]);
+
+    const onMouseLeave = useCallback(() => {
+        if (isDraggingRef.current) {
+            isDraggingRef.current = false;
+            snapBack();
+            touchStartXRef.current = null;
+            dragOffsetRef.current = 0;
+            isHorizontalRef.current = null;
+        }
+    }, [snapBack]);
+
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        const handleWheel = (e) => {
+            if (isTransitioningRef.current) return;
+            const now = Date.now();
+            if (now - lastWheelRef.current < 400) return;
+
+            if (Math.abs(e.deltaX) > Math.abs(e.deltaY) && Math.abs(e.deltaX) > 10) {
+                e.preventDefault();
+                lastWheelRef.current = now;
+                if (e.deltaX > 0) goToNext();
+                else goToPrev();
             }
-        }
-    };
+        };
+
+        container.addEventListener('wheel', handleWheel, { passive: false });
+        return () => container.removeEventListener('wheel', handleWheel);
+    }, [goToNext, goToPrev]);
 
     return (
         <section className="gallery">
@@ -247,41 +312,54 @@ const Gallery = () => {
 
                 {photos.length > 0 ? (
                     <div className="gallery-slider">
-                        <div 
+                        <div
                             className="main-image-container"
+                            ref={containerRef}
                             onTouchStart={onTouchStart}
                             onTouchMove={onTouchMove}
                             onTouchEnd={onTouchEnd}
                             onMouseDown={onMouseDown}
                             onMouseMove={onMouseMove}
                             onMouseUp={onMouseUp}
-                            onMouseLeave={() => {
-                                setIsDragging(false);
-                                setDragStart(null);
-                            }}
-                            onWheel={onWheel}
+                            onMouseLeave={onMouseLeave}
                         >
                             {!loadedImages.has(photos[currentIndex]) && showLoadingSpinner && (
                                 <div className="image-loading-placeholder">
                                     <div className="image-loading-spinner"></div>
                                 </div>
                             )}
-                            <img
-                                src={photos[currentIndex]}
-                                alt={`갤러리 사진 ${currentIndex + 1}`}
-                                className={`main-image ${loadedImages.has(photos[currentIndex]) ? 'loaded' : 'loading'} ${isDragging ? 'dragging' : ''}`}
-                                loading={currentIndex === 0 ? "eager" : "lazy"}
-                                decoding="async"
-                                draggable="false"
-                                fetchPriority={currentIndex === 0 ? "high" : "auto"}
-                                style={{
-                                    opacity: loadedImages.has(photos[currentIndex]) ? 1 : 0,
-                                    transition: 'opacity 0.1s ease-out'
-                                }}
-                            />
+                            <div className="slide-track" ref={trackRef}>
+                                <div className="slide">
+                                    <img
+                                        src={photos[prevIndex]}
+                                        alt={`갤러리 사진 ${prevIndex + 1}`}
+                                        className="slide-image"
+                                        draggable="false"
+                                        decoding="async"
+                                    />
+                                </div>
+                                <div className="slide">
+                                    <img
+                                        src={photos[currentIndex]}
+                                        alt={`갤러리 사진 ${currentIndex + 1}`}
+                                        className="slide-image"
+                                        draggable="false"
+                                        decoding="async"
+                                    />
+                                </div>
+                                <div className="slide">
+                                    <img
+                                        src={photos[nextIndex]}
+                                        alt={`갤러리 사진 ${nextIndex + 1}`}
+                                        className="slide-image"
+                                        draggable="false"
+                                        decoding="async"
+                                    />
+                                </div>
+                            </div>
                         </div>
 
-                        <div 
+                        <div
                             className="thumbnail-strip"
                             ref={thumbnailStripRef}
                         >
@@ -318,7 +396,6 @@ const Gallery = () => {
                     </div>
                 )}
             </div>
-
         </section>
     );
 };
