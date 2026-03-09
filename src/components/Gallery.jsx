@@ -34,6 +34,8 @@ const Gallery = () => {
     const isTransitioningRef = useRef(false);
     const isHorizontalRef = useRef(null);
     const lastWheelRef = useRef(0);
+    const slideTimerRef = useRef(null);
+    const slideGenRef = useRef(0);
 
     const prevIndex = (currentIndex - 1 + photos.length) % photos.length;
     const nextIndex = (currentIndex + 1) % photos.length;
@@ -43,6 +45,7 @@ const Gallery = () => {
             trackRef.current.style.transition = 'none';
             trackRef.current.style.transform = 'translateX(-33.333%)';
         }
+        isTransitioningRef.current = false;
     }, [currentIndex]);
 
     useEffect(() => {
@@ -140,53 +143,47 @@ const Gallery = () => {
         }
     }, [currentIndex]);
 
-    const goToNext = useCallback(() => {
+    const animateSlide = useCallback((targetTransform, indexUpdater) => {
         if (isTransitioningRef.current) return;
         isTransitioningRef.current = true;
 
-        if (trackRef.current) {
-            trackRef.current.style.transition = 'transform 0.28s cubic-bezier(0.22, 0.61, 0.36, 1)';
-            trackRef.current.style.transform = 'translateX(-66.666%)';
+        if (slideTimerRef.current) {
+            clearTimeout(slideTimerRef.current);
         }
 
-        const finish = () => {
-            isTransitioningRef.current = false;
-            setCurrentIndex(prev => (prev + 1) % photos.length);
-        };
+        const gen = ++slideGenRef.current;
 
-        const handler = () => {
-            trackRef.current?.removeEventListener('transitionend', handler);
-            finish();
-        };
-        trackRef.current?.addEventListener('transitionend', handler);
-        setTimeout(() => { if (isTransitioningRef.current) finish(); }, 350);
-    }, [photos.length]);
+        const containerWidth = containerRef.current?.offsetWidth || 400;
+        const draggedDistance = Math.abs(dragOffsetRef.current);
+        const remainingRatio = Math.max(0.3, 1 - draggedDistance / containerWidth);
+        const duration = Math.round(remainingRatio * 300);
+
+        if (trackRef.current) {
+            trackRef.current.style.transition = `transform ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
+            trackRef.current.style.transform = targetTransform;
+        }
+
+        slideTimerRef.current = setTimeout(() => {
+            if (slideGenRef.current !== gen) return;
+            indexUpdater();
+        }, duration + 20);
+    }, []);
+
+    const goToNext = useCallback(() => {
+        animateSlide('translateX(-66.666%)', () => {
+            setCurrentIndex(prev => (prev + 1) % photos.length);
+        });
+    }, [animateSlide, photos.length]);
 
     const goToPrev = useCallback(() => {
-        if (isTransitioningRef.current) return;
-        isTransitioningRef.current = true;
-
-        if (trackRef.current) {
-            trackRef.current.style.transition = 'transform 0.28s cubic-bezier(0.22, 0.61, 0.36, 1)';
-            trackRef.current.style.transform = 'translateX(0%)';
-        }
-
-        const finish = () => {
-            isTransitioningRef.current = false;
+        animateSlide('translateX(0%)', () => {
             setCurrentIndex(prev => (prev - 1 + photos.length) % photos.length);
-        };
-
-        const handler = () => {
-            trackRef.current?.removeEventListener('transitionend', handler);
-            finish();
-        };
-        trackRef.current?.addEventListener('transitionend', handler);
-        setTimeout(() => { if (isTransitioningRef.current) finish(); }, 350);
-    }, [photos.length]);
+        });
+    }, [animateSlide, photos.length]);
 
     const snapBack = useCallback(() => {
         if (trackRef.current) {
-            trackRef.current.style.transition = 'transform 0.2s cubic-bezier(0.22, 0.61, 0.36, 1)';
+            trackRef.current.style.transition = 'transform 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94)';
             trackRef.current.style.transform = 'translateX(-33.333%)';
         }
     }, []);
@@ -197,7 +194,10 @@ const Gallery = () => {
         const elapsed = Date.now() - (touchStartTimeRef.current || Date.now());
         const velocity = Math.abs(offset) / Math.max(elapsed, 1);
 
-        if (Math.abs(offset) > 40 || (velocity > 0.25 && Math.abs(offset) > 15)) {
+        const containerWidth = containerRef.current?.offsetWidth || 400;
+        const swipeRatio = Math.abs(offset) / containerWidth;
+
+        if (swipeRatio > 0.2 || (velocity > 0.3 && Math.abs(offset) > 20)) {
             if (offset < 0) goToNext();
             else goToPrev();
         } else {
@@ -206,7 +206,6 @@ const Gallery = () => {
 
         touchStartXRef.current = null;
         touchStartYRef.current = null;
-        dragOffsetRef.current = 0;
         isHorizontalRef.current = null;
     }, [goToNext, goToPrev, snapBack]);
 
@@ -236,9 +235,12 @@ const Gallery = () => {
 
         if (!isHorizontalRef.current) return;
 
-        dragOffsetRef.current = dx;
+        const containerWidth = containerRef.current?.offsetWidth || 400;
+        const clampedDx = Math.max(-containerWidth * 0.85, Math.min(containerWidth * 0.85, dx));
+
+        dragOffsetRef.current = clampedDx;
         if (trackRef.current) {
-            trackRef.current.style.transform = `translateX(calc(-33.333% + ${dx}px))`;
+            trackRef.current.style.transform = `translateX(calc(-33.333% + ${clampedDx}px))`;
         }
     }, []);
 
@@ -263,9 +265,13 @@ const Gallery = () => {
     const onMouseMove = useCallback((e) => {
         if (!isDraggingRef.current || touchStartXRef.current === null) return;
         const dx = e.clientX - touchStartXRef.current;
-        dragOffsetRef.current = dx;
+
+        const containerWidth = containerRef.current?.offsetWidth || 400;
+        const clampedDx = Math.max(-containerWidth * 0.85, Math.min(containerWidth * 0.85, dx));
+
+        dragOffsetRef.current = clampedDx;
         if (trackRef.current) {
-            trackRef.current.style.transform = `translateX(calc(-33.333% + ${dx}px))`;
+            trackRef.current.style.transform = `translateX(calc(-33.333% + ${clampedDx}px))`;
         }
     }, []);
 
@@ -277,9 +283,9 @@ const Gallery = () => {
     const onMouseLeave = useCallback(() => {
         if (isDraggingRef.current) {
             isDraggingRef.current = false;
+            dragOffsetRef.current = 0;
             snapBack();
             touchStartXRef.current = null;
-            dragOffsetRef.current = 0;
             isHorizontalRef.current = null;
         }
     }, [snapBack]);
@@ -291,11 +297,12 @@ const Gallery = () => {
         const handleWheel = (e) => {
             if (isTransitioningRef.current) return;
             const now = Date.now();
-            if (now - lastWheelRef.current < 400) return;
+            if (now - lastWheelRef.current < 500) return;
 
-            if (Math.abs(e.deltaX) > Math.abs(e.deltaY) && Math.abs(e.deltaX) > 10) {
+            if (Math.abs(e.deltaX) > Math.abs(e.deltaY) && Math.abs(e.deltaX) > 15) {
                 e.preventDefault();
                 lastWheelRef.current = now;
+                dragOffsetRef.current = 0;
                 if (e.deltaX > 0) goToNext();
                 else goToPrev();
             }
@@ -304,6 +311,14 @@ const Gallery = () => {
         container.addEventListener('wheel', handleWheel, { passive: false });
         return () => container.removeEventListener('wheel', handleWheel);
     }, [goToNext, goToPrev]);
+
+    useEffect(() => {
+        return () => {
+            if (slideTimerRef.current) {
+                clearTimeout(slideTimerRef.current);
+            }
+        };
+    }, []);
 
     return (
         <section className="gallery">
